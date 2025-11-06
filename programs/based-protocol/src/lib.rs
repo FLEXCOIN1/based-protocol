@@ -8,6 +8,8 @@ const VESTING_DURATION: i64 = 31536000; // 12 months in seconds
 const EARLY_WITHDRAWAL_PENALTY_BPS: u64 = 1000; // 10% penalty (basis points)
 const MAX_MULTIPLIER_BPS: u64 = 10000; // 10X max multiplier (10000 = 10.00X)
 const MULTIPLIER_GROWTH_RATE: u64 = 50; // 0.5% per week (50 bps)
+const REFERRAL_REWARD_BPS: u64 = 1000; // 10% of penalties go to referrer
+const PLATFORM_FEE_BPS: u64 = 200; // 2% platform fee
 
 #[program]
 pub mod based_protocol {
@@ -23,13 +25,15 @@ pub mod based_protocol {
         pool.authority = ctx.accounts.authority.key();
         pool.total_staked = 0;
         pool.reward_rate = reward_rate;
+        pool.total_users = 0;
         pool.bump = ctx.bumps.pool;
 
         msg!("Staking pool initialized with {} reward_rate", reward_rate);
         Ok(())
     }
 
-    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
+    // UPDATED: deposit with optional referrer
+    pub fn deposit(ctx: Context<Deposit>, amount: u64, referrer: Option<Pubkey>) -> Result<()> {
         let clock = Clock::get()?;
 
         // Transfer SOL from user to pool
@@ -43,23 +47,30 @@ pub mod based_protocol {
         let pool = &mut ctx.accounts.pool;
         let user_stake = &mut ctx.accounts.user_stake;
 
-        // Update multiplier based on time staked
-        if user_stake.amount > 0 {
+        // Set referrer on FIRST deposit only
+        if user_stake.amount == 0 {
+            if let Some(ref_pubkey) = referrer {
+                user_stake.referrer = Some(ref_pubkey);
+                msg!("Referrer set: {:?}", ref_pubkey);
+            }
+            user_stake.vesting_start = clock.unix_timestamp;
+            user_stake.multiplier_points = 0;
+            pool.total_users = pool.total_users.checked_add(1).ok_or(ErrorCode::MathOverflow)?;
+            user_stake.leaderboard_position = pool.total_users;
+        } else {
+            // Update multiplier based on time staked
             let time_since_last = clock.unix_timestamp - user_stake.last_stake_time;
             user_stake.total_time_staked = user_stake.total_time_staked
                 .checked_add(time_since_last)
                 .ok_or(ErrorCode::MathOverflow)?;
 
-            let weeks_staked = user_stake.total_time_staked / 604800; // seconds per week
+            let weeks_staked = user_stake.total_time_staked / 604800;
             let new_multiplier = (weeks_staked as u64)
                 .checked_mul(MULTIPLIER_GROWTH_RATE)
                 .ok_or(ErrorCode::MathOverflow)?
                 .min(MAX_MULTIPLIER_BPS);
 
             user_stake.multiplier_points = new_multiplier;
-        } else {
-            user_stake.vesting_start = clock.unix_timestamp;
-            user_stake.multiplier_points = 0;
         }
 
         pool.total_staked = pool.total_staked
@@ -74,10 +85,11 @@ pub mod based_protocol {
         user_stake.bump = ctx.bumps.user_stake;
 
         msg!(
-            "Deposited {} lamports. Total: {}. Multiplier: {} bps",
+            "Deposited {} lamports. Total: {}. Multiplier: {} bps. Rank: {}",
             amount,
             user_stake.amount,
-            user_stake.multiplier_points
+            user_stake.multiplier_points,
+            user_stake.leaderboard_position
         );
         Ok(())
     }
@@ -108,6 +120,21 @@ pub mod based_protocol {
         };
 
         let withdrawal_amount = amount.checked_sub(penalty_amount).ok_or(ErrorCode::MathOverflow)?;
+
+        // If user has referrer, give them 10% of penalty
+        if penalty_amount > 0 && user_stake.referrer.is_some() {
+            let referral_reward = penalty_amount
+                .checked_mul(REFERRAL_REWARD_BPS)
+                .ok_or(ErrorCode::MathOverflow)?
+                .checked_div(10_000)
+                .ok_or(ErrorCode::MathOverflow)?;
+            
+            user_stake.referral_rewards_pending = user_stake.referral_rewards_pending
+                .checked_add(referral_reward)
+                .ok_or(ErrorCode::MathOverflow)?;
+            
+            msg!("Referrer earned {} lamports from penalty", referral_reward);
+        }
 
         **pool.to_account_info().try_borrow_mut_lamports()? = pool
             .to_account_info()
@@ -201,6 +228,12 @@ pub mod based_protocol {
             .escrowed_rewards
             .checked_add(escrowed_rewards)
             .ok_or(ErrorCode::MathOverflow)?;
+        
+        user_stake.total_rewards_earned = user_stake
+            .total_rewards_earned
+            .checked_add(rewards)
+            .ok_or(ErrorCode::MathOverflow)?;
+        
         user_stake.last_stake_time = clock.unix_timestamp;
 
         msg!(
@@ -210,6 +243,40 @@ pub mod based_protocol {
             escrowed_rewards,
             user_stake.escrowed_rewards
         );
+        Ok(())
+    }
+
+    // NEW: Claim referral rewards
+    pub fn claim_referral_rewards(ctx: Context<ClaimReferralRewards>) -> Result<()> {
+        let user_stake = &mut ctx.accounts.user_stake;
+        
+        require!(user_stake.referral_rewards_pending > 0, ErrorCode::NoReferralRewards);
+        
+        let amount = user_stake.referral_rewards_pending;
+        user_stake.referral_rewards_pending = 0;
+        user_stake.total_referral_rewards_claimed = user_stake
+            .total_referral_rewards_claimed
+            .checked_add(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+        
+        msg!(
+            "Claimed {} lamports in referral rewards. Total: {}",
+            amount,
+            user_stake.total_referral_rewards_claimed
+        );
+        Ok(())
+    }
+
+    // NEW: Get leaderboard stats
+    pub fn get_leaderboard_stats(ctx: Context<GetLeaderboardStats>) -> Result<()> {
+        let user_stake = &ctx.accounts.user_stake;
+        
+        msg!("Leaderboard Stats:");
+        msg!("  Rank: {}", user_stake.leaderboard_position);
+        msg!("  Staked: {}", user_stake.amount);
+        msg!("  Multiplier: {} bps", user_stake.multiplier_points);
+        msg!("  Total earned: {}", user_stake.total_rewards_earned);
+        msg!("  Referral earnings: {}", user_stake.total_referral_rewards_claimed);
         Ok(())
     }
 
@@ -282,6 +349,7 @@ pub struct StakingPool {
     pub authority: Pubkey,
     pub total_staked: u64,
     pub reward_rate: u64,
+    pub total_users: u64,      // NEW: for leaderboard
     pub bump: u8,
 }
 
@@ -295,6 +363,11 @@ pub struct UserStake {
     pub vesting_start: i64,
     pub multiplier_points: u64,
     pub total_time_staked: i64,
+    pub referrer: Option<Pubkey>,              // NEW: who referred this user
+    pub referral_rewards_pending: u64,         // NEW: pending referral earnings
+    pub total_referral_rewards_claimed: u64,   // NEW: total referral claimed
+    pub leaderboard_position: u64,             // NEW: rank
+    pub total_rewards_earned: u64,             // NEW: lifetime rewards
     pub bump: u8,
 }
 
@@ -303,7 +376,7 @@ pub struct InitializePool<'info> {
     #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 8 + 8 + 1,
+        space = 8 + 32 + 8 + 8 + 8 + 1,  // UPDATED: +8 for total_users
         seeds = [b"pool"],
         bump,
     )]
@@ -322,7 +395,7 @@ pub struct Deposit<'info> {
     #[account(
         init_if_needed,
         payer = user,
-        space = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1,
+        space = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 33 + 8 + 8 + 8 + 8 + 1,  // UPDATED: added new fields
         seeds = [b"user_stake", user.key().as_ref()],
         bump,
     )]
@@ -357,6 +430,24 @@ pub struct ClaimRewards<'info> {
     pub user: Signer<'info>,
 }
 
+// NEW: Claim referral rewards
+#[derive(Accounts)]
+pub struct ClaimReferralRewards<'info> {
+    #[account(mut, seeds = [b"user_stake", user.key().as_ref()], bump = user_stake.bump)]
+    pub user_stake: Account<'info, UserStake>,
+
+    pub user: Signer<'info>,
+}
+
+// NEW: Get leaderboard stats
+#[derive(Accounts)]
+pub struct GetLeaderboardStats<'info> {
+    #[account(seeds = [b"user_stake", user.key().as_ref()], bump = user_stake.bump)]
+    pub user_stake: Account<'info, UserStake>,
+
+    pub user: Signer<'info>,
+}
+
 #[derive(Accounts)]
 pub struct CalculateRewards<'info> {
     #[account(seeds = [b"pool"], bump = pool.bump)]
@@ -376,4 +467,6 @@ pub enum ErrorCode {
     MathOverflow,
     #[msg("Time calculation error (clock skew or invalid last stake time)")]
     TimeCalculationError,
+    #[msg("No referral rewards available")]
+    NoReferralRewards,
 }
