@@ -1,3 +1,16 @@
+#[cfg(not(feature = "no-entrypoint"))]
+use solana_security_txt::security_txt;
+
+#[cfg(not(feature = "no-entrypoint"))]
+security_txt! {
+    name: "BASED Protocol",
+    project_url: "https://github.com/basedprotocol/based-protocol",
+    contacts: "email:fytsfitness@gmail.com",
+    policy: "https://github.com/basedprotocol/based-protocol/blob/master/SECURITY.md",
+    preferred_languages: "en",
+    source_code: "https://github.com/basedprotocol/based-protocol"
+}
+
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
 
