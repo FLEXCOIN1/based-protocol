@@ -175,6 +175,40 @@ export default function FAQ() {
             </button>
           </Link>
         </div>
+          <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+            <h2 className="text-2xl font-bold mb-3">What if Nick thinks this is dumb and a scam?</h2>
+            <p className="text-gray-300 mb-4">
+              Fair question. Here's why Nick (and any skeptic) should actually look closer:
+            </p>
+            <ul className="space-y-3 text-gray-300">
+              <li className="flex items-start gap-3">
+                <span className="text-green-400 font-bold">1.</span>
+                <span><strong>Real revenue model:</strong> Unlike 99% of crypto tokens that rely on "number go up" or Ponzi mechanics, $BASED generates revenue from actual protocol usage (deposit fees, rage quit penalties, trading fees). This isn't speculative - it's a business model that works whether new buyers show up or not.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-400 font-bold">2.</span>
+                <span><strong>Deflationary by design:</strong> Most tokens die because supply increases forever (inflation kills price). $BASED does the opposite - 40% of ALL revenue goes to buying tokens from the market and burning them permanently. Math is simple: less supply + same demand = higher price. This is how profitable companies do stock buybacks.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-400 font-bold">3.</span>
+                <span><strong>Proven model from TradFi:</strong> This isn't some moonshot experiment - it's the same model successful DeFi protocols use (GMX does $50M+ revenue/year with buyback & burn). We're just adding gamification to make staking actually fun. The core economics are battle-tested.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-400 font-bold">4.</span>
+                <span><strong>Fully transparent & can't rug:</strong> Smart contract code is public on GitHub. All burns are verifiable on Solana explorer. Team tokens are vested over 2 years. Liquidity will be locked in DEX contracts. Unlike most crypto projects run by anons, there's a real person (CJ) with a 13-year business building this. Reputation on the line.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-400 font-bold">5.</span>
+                <span><strong>It's okay to be skeptical:</strong> Most crypto IS a scam. Nick's default position should be "prove it." That's smart. Which is why we built a full working platform on devnet first, wrote comprehensive documentation, and made everything open source. Don't trust - verify. Check the code. Read the tokenomics. Then decide if the math checks out. (Spoiler: it does.)</span>
+              </li>
+            </ul>
+            <div className="mt-6 bg-purple-500/20 border-l-4 border-purple-500 p-4 rounded">
+              <p className="text-sm text-gray-300">
+                <strong>TL;DR for Nick:</strong> This isn't SafeMoon 2.0. It's a legitimate DeFi protocol with real revenue, real burns, and real utility. Skepticism is healthy - blind trust is dumb. That's why everything is transparent and verifiable on-chain. DYOR. 🤝
+              </p>
+            </div>
+          </div>
+
       </main>
     </div>
   );
