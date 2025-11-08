@@ -13,6 +13,7 @@ export default function FAQ() {
           </Link>
           <Link href="/leaderboard" className="text-white hover:underline">Leaderboard</Link>
           <Link href="/how-it-works" className="text-white hover:underline">How It Works</Link>
+          <Link href="/tokenomics" className="text-white hover:underline">Tokenomics</Link>
           <Link href="/faq" className="text-white hover:underline font-bold">FAQ</Link>
         </div>
         <WalletButton />

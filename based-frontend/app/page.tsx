@@ -81,6 +81,7 @@ export default function Home() {
           </Link>
           <Link href="/leaderboard" className="text-white hover:underline">Leaderboard</Link>
           <Link href="/how-it-works" className="text-white hover:underline">How It Works</Link>
+          <Link href="/tokenomics" className="text-white hover:underline">Tokenomics</Link>
           <Link href="/dashboard" className="text-white hover:underline">Dashboard</Link>
           <Link href="/faq" className="text-white hover:underline">FAQ</Link>
         </div>
