@@ -13,6 +13,10 @@ security_txt! {
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
+use anchor_spl::token::{self, Transfer};
+
+mod token_staking;
+use token_staking::*;
 
 declare_id!("DGVsFppxXqsuLPtF2oYvfh3uccdvGMGEVi4ZxuaQu5RU");
 
@@ -483,3 +487,230 @@ pub enum ErrorCode {
     #[msg("No referral rewards available")]
     NoReferralRewards,
 }
+
+    // ============== TOKEN STAKING FUNCTIONS ==============
+
+    pub fn initialize_token_pool(
+        ctx: Context<InitializeTokenPool>,
+        reward_rate: u64,
+    ) -> Result<()> {
+        let token_pool = &mut ctx.accounts.token_pool;
+        token_pool.authority = ctx.accounts.authority.key();
+        token_pool.token_mint = ctx.accounts.token_mint.key();
+        token_pool.total_staked = 0;
+        token_pool.reward_rate = reward_rate;
+        token_pool.total_users = 0;
+        token_pool.bump = ctx.bumps.token_pool;
+        msg!("Token staking pool initialized for mint: {:?}", token_pool.token_mint);
+        Ok(())
+    }
+
+    pub fn deposit_token(
+        ctx: Context<DepositToken>,
+        amount: u64,
+        referrer: Option<Pubkey>,
+    ) -> Result<()> {
+        let clock = Clock::get()?;
+
+        // Transfer tokens from user to pool vault
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.user_token_account.to_account_info(),
+            to: ctx.accounts.pool_token_account.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, amount)?;
+
+        let token_pool = &mut ctx.accounts.token_pool;
+        let token_user_stake = &mut ctx.accounts.token_user_stake;
+
+        // First time staking
+        if token_user_stake.amount == 0 {
+            if let Some(ref_pubkey) = referrer {
+                token_user_stake.referrer = Some(ref_pubkey);
+                msg!("Referrer set: {:?}", ref_pubkey);
+            }
+            token_user_stake.vesting_start = clock.unix_timestamp;
+            token_user_stake.multiplier_points = 0;
+            token_pool.total_users = token_pool.total_users
+                .checked_add(1)
+                .ok_or(ErrorCode::MathOverflow)?;
+            token_user_stake.leaderboard_position = token_pool.total_users;
+        } else {
+            // Update multiplier based on time staked
+            let time_since_last = clock.unix_timestamp - token_user_stake.last_stake_time;
+            token_user_stake.total_time_staked = token_user_stake.total_time_staked
+                .checked_add(time_since_last)
+                .ok_or(ErrorCode::MathOverflow)?;
+            
+            let weeks_staked = token_user_stake.total_time_staked / 604800;
+            let new_multiplier = (weeks_staked as u64)
+                .checked_mul(MULTIPLIER_GROWTH_RATE)
+                .ok_or(ErrorCode::MathOverflow)?
+                .min(MAX_MULTIPLIER_BPS);
+            token_user_stake.multiplier_points = new_multiplier;
+        }
+
+        token_pool.total_staked = token_pool.total_staked
+            .checked_add(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        token_user_stake.owner = ctx.accounts.user.key();
+        token_user_stake.amount = token_user_stake.amount
+            .checked_add(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+        token_user_stake.last_stake_time = clock.unix_timestamp;
+        token_user_stake.bump = ctx.bumps.token_user_stake;
+
+        msg!("Deposited {} tokens. Total staked: {}", amount, token_user_stake.amount);
+        Ok(())
+    }
+
+    pub fn withdraw_token(ctx: Context<WithdrawToken>, amount: u64) -> Result<()> {
+        let token_user_stake = &mut ctx.accounts.token_user_stake;
+        let token_pool = &mut ctx.accounts.token_pool;
+        let clock = Clock::get()?;
+
+        require!(
+            token_user_stake.amount >= amount,
+            ErrorCode::InsufficientFunds
+        );
+
+        // Calculate penalty based on time staked
+        let time_staked = clock.unix_timestamp - token_user_stake.vesting_start;
+        let penalty_amount = if time_staked < 2592000 {
+            // < 1 month = 25% penalty
+            amount.checked_mul(2500).ok_or(ErrorCode::MathOverflow)? / 10000
+        } else if time_staked < 7776000 {
+            // 1-3 months = 15% penalty
+            amount.checked_mul(1500).ok_or(ErrorCode::MathOverflow)? / 10000
+        } else if time_staked < 15552000 {
+            // 3-6 months = 10% penalty
+            amount.checked_mul(1000).ok_or(ErrorCode::MathOverflow)? / 10000
+        } else if time_staked < VESTING_DURATION {
+            // 6-12 months = 5% penalty
+            amount.checked_mul(500).ok_or(ErrorCode::MathOverflow)? / 10000
+        } else {
+            0 // No penalty after 1 year
+        };
+
+        let withdraw_amount = amount.checked_sub(penalty_amount).ok_or(ErrorCode::MathOverflow)?;
+
+        // Transfer tokens from pool vault to user
+        let pool_key = token_pool.key();
+        let seeds = &[
+            b"token_pool".as_ref(),
+            token_pool.token_mint.as_ref(),
+            &[token_pool.bump],
+        ];
+        let signer = &[&seeds[..]];
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.pool_token_account.to_account_info(),
+            to: ctx.accounts.user_token_account.to_account_info(),
+            authority: token_pool.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+        token::transfer(cpi_ctx, withdraw_amount)?;
+
+        // Handle referral rewards from penalty
+        if penalty_amount > 0 {
+            if let Some(referrer_key) = token_user_stake.referrer {
+                let referral_reward = penalty_amount
+                    .checked_mul(REFERRAL_REWARD_BPS)
+                    .ok_or(ErrorCode::MathOverflow)?
+                    .checked_div(10000)
+                    .ok_or(ErrorCode::MathOverflow)?;
+                
+                // Note: In production, you'd add this to referrer's account
+                msg!("Referral reward {} tokens for {:?}", referral_reward, referrer_key);
+            }
+        }
+
+        token_user_stake.amount = token_user_stake.amount
+            .checked_sub(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        token_pool.total_staked = token_pool.total_staked
+            .checked_sub(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        msg!(
+            "Withdrew {} tokens (penalty: {}). Remaining: {}",
+            withdraw_amount,
+            penalty_amount,
+            token_user_stake.amount
+        );
+        Ok(())
+    }
+
+    pub fn claim_token_rewards(ctx: Context<ClaimTokenRewards>) -> Result<()> {
+        let token_pool = &ctx.accounts.token_pool;
+        let token_user_stake = &mut ctx.accounts.token_user_stake;
+        let clock = Clock::get()?;
+
+        // Calculate rewards
+        let time_staked = clock.unix_timestamp
+            .checked_sub(token_user_stake.last_stake_time)
+            .ok_or(ErrorCode::TimeCalculationError)?;
+        
+        let base_multiplier: u128 = 5000;
+        let total_multiplier = base_multiplier + (token_user_stake.multiplier_points as u128);
+
+        let base_rewards = (token_user_stake.amount as u128)
+            .checked_mul(token_pool.reward_rate as u128)
+            .ok_or(ErrorCode::MathOverflow)?
+            .checked_mul(time_staked as u128)
+            .ok_or(ErrorCode::MathOverflow)?
+            .checked_div(10_000u128)
+            .ok_or(ErrorCode::MathOverflow)?
+            .checked_div(31_536_000u128)
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        let total_rewards = base_rewards
+            .checked_mul(total_multiplier)
+            .ok_or(ErrorCode::MathOverflow)?
+            .checked_div(5000u128)
+            .ok_or(ErrorCode::MathOverflow)?;
+
+        let rewards = total_rewards as u64;
+
+        if rewards > 0 {
+            // Transfer rewards from pool vault to user
+            let pool_key = token_pool.key();
+            let seeds = &[
+                b"token_pool".as_ref(),
+                token_pool.token_mint.as_ref(),
+                &[token_pool.bump],
+            ];
+            let signer = &[&seeds[..]];
+
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.pool_token_account.to_account_info(),
+                to: ctx.accounts.user_token_account.to_account_info(),
+                authority: token_pool.to_account_info(),
+            };
+            let cpi_program = ctx.accounts.token_program.to_account_info();
+            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+            token::transfer(cpi_ctx, rewards)?;
+
+            token_user_stake.total_rewards_earned = token_user_stake.total_rewards_earned
+                .checked_add(rewards)
+                .ok_or(ErrorCode::MathOverflow)?;
+            
+            token_user_stake.last_stake_time = clock.unix_timestamp;
+
+            msg!("Claimed {} token rewards", rewards);
+        }
+
+        Ok(())
+    }
+
+// ============== TOKEN STAKING ACCOUNT STRUCTS ==============
+
+use token_staking::{
+    TokenStakingPool, TokenUserStake, InitializeTokenPool,
+    DepositToken, WithdrawToken, ClaimTokenRewards
+};
