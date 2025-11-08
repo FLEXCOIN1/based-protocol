@@ -1,0 +1,426 @@
+'use client';
+
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import WalletButton from '@/components/WalletButton';
+import { useState, useEffect } from 'react';
+import { depositSOL, withdrawSOL, getStakeInfo, getPoolStats, claimRewardsSOL } from '@/lib/staking';
+import { calculateLevelProgress } from '@/lib/gamification';
+import Link from 'next/link';
+import ReferralCode from '@/components/ReferralCode';
+
+export default function Home() {
+  const { publicKey, signTransaction, signAllTransactions } = useWallet();
+  const { connection } = useConnection();
+  const [amount, setAmount] = useState('0.1');
+  const [loading, setLoading] = useState(false);
+  const [txSignature, setTxSignature] = useState('');
+  const [stakeData, setStakeData] = useState<any>(null);
+  const [poolStats, setPoolStats] = useState({ totalStaked: 0, totalUsers: 0 });
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  
+  const [calcAmount, setCalcAmount] = useState('1.0');
+  const [calcDays, setCalcDays] = useState('365');
+  const [calcResults, setCalcResults] = useState({ earnings: 0, multiplier: 1.0, effectiveAPY: 8.5 });
+
+  useEffect(() => {
+    const targetDate = new Date('2025-12-31T23:59:59').getTime();
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+      if (distance > 0) {
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000)
+        });
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+    loadPoolStats();
+  }, []);
+
+  useEffect(() => {
+    if (publicKey) {
+      loadStakeData();
+      loadWalletBalance();
+    }
+  }, [publicKey]);
+
+  useEffect(() => {
+    calculateEarnings();
+  }, [calcAmount, calcDays]);
+
+  const calculateEarnings = () => {
+    const baseAPY = 0.085;
+    const stakedAmount = parseFloat(calcAmount) || 0;
+    const daysHeld = parseInt(calcDays) || 0;
+    const weeksHeld = daysHeld / 7;
+    const multiplier = Math.min(1 + (weeksHeld * 0.005), 10);
+    const effectiveAPY = baseAPY * multiplier;
+    const yearlyEarnings = stakedAmount * effectiveAPY;
+    const earnings = (yearlyEarnings / 365) * daysHeld;
+
+    setCalcResults({
+      earnings: earnings,
+      multiplier: multiplier,
+      effectiveAPY: effectiveAPY * 100
+    });
+  };
+
+  const loadPoolStats = async () => {
+    try {
+      const stats = await getPoolStats(connection);
+      setPoolStats(stats);
+    } catch (e) {
+      console.error('Error loading pool stats:', e);
+    }
+  };
+
+  const loadWalletBalance = async () => {
+    if (!publicKey) return;
+    try {
+      const balance = await connection.getBalance(publicKey);
+      setWalletBalance(balance / 1_000_000_000);
+    } catch (e) {
+      console.error('Error loading balance:', e);
+    }
+  };
+
+  const loadStakeData = async () => {
+    if (!publicKey || !signTransaction || !signAllTransactions) return;
+    try {
+      const wallet = { publicKey, signTransaction, signAllTransactions };
+      const data = await getStakeInfo(connection, publicKey, wallet);
+      setStakeData(data);
+    } catch (e) {
+      console.error('Error loading stake:', e);
+    }
+  };
+
+  const handleStake = async () => {
+    if (!publicKey || !signTransaction || !signAllTransactions) return;
+    try {
+      setLoading(true);
+      const wallet = { publicKey, signTransaction, signAllTransactions };
+      const signature = await depositSOL(connection, publicKey, parseFloat(amount), wallet);
+      setTxSignature(signature);
+      alert('Staked ' + amount + ' SOL');
+      await loadStakeData();
+      await loadPoolStats();
+      await loadWalletBalance();
+    } catch (error) {
+      console.error(error);
+      alert('Transaction failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUnstake = async () => {
+    if (!publicKey || !signTransaction || !signAllTransactions) return;
+    try {
+      setLoading(true);
+      const wallet = { publicKey, signTransaction, signAllTransactions };
+      const signature = await withdrawSOL(connection, publicKey, parseFloat(amount), wallet);
+      setTxSignature(signature);
+      alert('Unstaked ' + amount + ' SOL');
+      await loadStakeData();
+      await loadPoolStats();
+      await loadWalletBalance();
+    } catch (error) {
+      console.error(error);
+      alert('Transaction failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClaimRewards = async () => {
+    if (!publicKey || !signTransaction || !signAllTransactions) return;
+    try {
+      setLoading(true);
+      const wallet = { publicKey, signTransaction, signAllTransactions };
+      const signature = await claimRewardsSOL(connection, publicKey, wallet);
+      setTxSignature(signature);
+      alert('Claimed rewards!');
+      await loadStakeData();
+      await loadWalletBalance();
+    } catch (error) {
+      console.error(error);
+      alert('Claim failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900">
+        <div className="flex items-center justify-center h-screen text-white">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const foundersLeft = Math.max(0, 100 - poolStats.totalUsers);
+  const isFounder = poolStats.totalUsers < 100;
+  
+  // Calculate level progress if user is connected
+  const levelProgress = stakeData ? calculateLevelProgress(stakeData.weeksStaked) : null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900">
+      <nav className="p-6 flex justify-between items-center">
+        <div className="flex gap-6 items-center">
+          <h1 className="text-3xl font-bold text-white">BASED Protocol</h1>
+          <Link href="/leaderboard" className="text-white hover:underline">Leaderboard</Link>
+          <Link href="/how-it-works" className="text-white hover:underline">How It Works</Link>
+          <Link href="/dashboard" className="text-white hover:underline">Dashboard</Link>
+          <Link href="/faq" className="text-white hover:underline">FAQ</Link>
+        </div>
+        <WalletButton />
+      </nav>
+      <div className="bg-black/50 backdrop-blur py-4 border-y border-white/10">
+        <div className="container mx-auto px-6 flex justify-around items-center text-white">
+          <div className="text-center">
+            <p className="text-sm text-gray-400">Total Value Locked</p>
+            <p className="text-2xl font-bold">{poolStats.totalStaked.toFixed(2)} SOL</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-400">Total Stakers</p>
+            <p className="text-2xl font-bold">{poolStats.totalUsers}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-400">APY</p>
+            <p className="text-2xl font-bold">8.5%</p>
+          </div>
+        </div>
+      </div>
+      {isFounder && (
+        <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-y border-yellow-500/50 py-6">
+          <div className="container mx-auto px-6 text-center text-white">
+            <h3 className="text-2xl font-bold mb-2">FOUNDERS BONUS ENDING SOON</h3>
+            <p className="text-gray-300 mb-4">First 100 stakers get 2X multiplier boost forever</p>
+            <div className="flex justify-center gap-4 text-center">
+              <div className="bg-black/50 px-6 py-3 rounded-lg">
+                <p className="text-3xl font-bold">{timeLeft.days}</p>
+                <p className="text-sm text-gray-400">Days</p>
+              </div>
+              <div className="bg-black/50 px-6 py-3 rounded-lg">
+                <p className="text-3xl font-bold">{timeLeft.hours}</p>
+                <p className="text-sm text-gray-400">Hours</p>
+              </div>
+              <div className="bg-black/50 px-6 py-3 rounded-lg">
+                <p className="text-3xl font-bold">{timeLeft.minutes}</p>
+                <p className="text-sm text-gray-400">Minutes</p>
+              </div>
+              <div className="bg-black/50 px-6 py-3 rounded-lg">
+                <p className="text-3xl font-bold">{timeLeft.seconds}</p>
+                <p className="text-sm text-gray-400">Seconds</p>
+              </div>
+            </div>
+            <p className="mt-4 text-xl font-bold text-yellow-400">{foundersLeft} Spots Left</p>
+          </div>
+        </div>
+      )}
+      <main className="container mx-auto px-6 py-12">
+        {!publicKey ? (
+          <div className="text-center text-white">
+            <h2 className="text-5xl font-bold mb-4">Social Staking. Built Different.</h2>
+            <p className="text-xl mb-8">Stake SOL. Earn 8.5% APY. Compete on the leaderboard.</p>
+            <p className="text-gray-400">Connect your wallet to get started</p>
+            
+            <div className="mt-12 bg-white/10 backdrop-blur p-8 rounded-lg max-w-2xl mx-auto">
+              <h3 className="text-3xl font-bold mb-6">Earnings Calculator</h3>
+              <p className="text-gray-300 mb-6">See how much you can earn with BASED Protocol</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Amount to Stake (SOL)</label>
+                  <input
+                    type="number"
+                    value={calcAmount}
+                    onChange={(e) => setCalcAmount(e.target.value)}
+                    className="w-full bg-white/20 rounded px-4 py-3 text-white text-xl"
+                    placeholder="1.0"
+                    step="0.1"
+                    min="0.01"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Days to Hold</label>
+                  <input
+                    type="number"
+                    value={calcDays}
+                    onChange={(e) => setCalcDays(e.target.value)}
+                    className="w-full bg-white/20 rounded px-4 py-3 text-white text-xl"
+                    placeholder="365"
+                    step="1"
+                    min="1"
+                  />
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 p-6 rounded-lg border border-purple-500/30">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Projected Earnings</p>
+                    <p className="text-3xl font-bold text-green-400">{calcResults.earnings.toFixed(4)} SOL</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Your Multiplier</p>
+                    <p className="text-3xl font-bold text-yellow-400">{calcResults.multiplier.toFixed(2)}x</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Effective APY</p>
+                    <p className="text-3xl font-bold text-blue-400">{calcResults.effectiveAPY.toFixed(1)}%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mt-4 text-center">
+                  Based on 8.5% base APY + {calcResults.multiplier.toFixed(2)}x multiplier
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : stakeData ? (
+          <div className="text-white max-w-4xl mx-auto space-y-8">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-4xl font-bold">Welcome Back</h2>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-4xl">{stakeData.level.emoji}</span>
+                  <div>
+                    <p className="text-2xl font-bold">{stakeData.level.name}</p>
+                    <p className="text-sm text-gray-400">Level {stakeData.level.level}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-400">Wallet Balance</p>
+                <p className="text-2xl font-bold">{walletBalance.toFixed(4)} SOL</p>
+                <p className="text-sm text-yellow-400 mt-1">🔥 {stakeData.loginStreak} day streak</p>
+              </div>
+            </div>
+
+            {levelProgress && levelProgress.nextLevel && (
+              <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm text-gray-400">Progress to {levelProgress.nextLevel.emoji} {levelProgress.nextLevel.name}</p>
+                  <p className="text-sm font-bold">{levelProgress.progress.toFixed(0)}%</p>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-500"
+                    style={{ width: levelProgress.progress + '%' }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  {(levelProgress.next - levelProgress.current).toFixed(1)} weeks until next level
+                </p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-2">Your Stake</h3>
+                <p className="text-3xl">{stakeData.staked.toFixed(2)} SOL</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-2">Multiplier</h3>
+                <p className="text-3xl">{stakeData.level.multiplier.toFixed(2)}x</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-2">Rank</h3>
+                <p className="text-3xl">#{stakeData.rank || '-'}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-2">Pending Rewards</h3>
+                <p className="text-3xl">{stakeData.rewards.toFixed(4)} SOL</p>
+                <button 
+                  onClick={handleClaimRewards} 
+                  disabled={loading || stakeData.rewards === 0} 
+                  className="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded font-bold text-sm"
+                >
+                  {loading ? 'Loading' : 'CLAIM'}
+                </button>
+              </div>
+            </div>
+
+            {stakeData.achievements.length > 0 && (
+              <div className="bg-white/10 backdrop-blur p-6 rounded-lg">
+                <h3 className="text-2xl font-bold mb-4">Achievements Unlocked</h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {stakeData.achievements.map((achievement: any) => (
+                    <div key={achievement.id} className="text-center p-3 bg-white/5 rounded-lg">
+                      <p className="text-4xl mb-2">{achievement.emoji}</p>
+                      <p className="text-sm font-bold">{achievement.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white/10 backdrop-blur p-8 rounded-lg">
+              <h3 className="text-2xl font-bold mb-4">Stake / Unstake SOL</h3>
+              <div className="flex gap-4 mb-4">
+                <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="flex-1 bg-white/20 rounded px-4 py-3 text-white text-xl" placeholder="0.1" step="0.1" min="0.01" />
+                <button onClick={handleStake} disabled={loading} className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-8 py-3 rounded font-bold text-xl">{loading ? 'Loading' : 'STAKE'}</button>
+                <button onClick={handleUnstake} disabled={loading} className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 px-8 py-3 rounded font-bold text-xl">{loading ? 'Loading' : 'UNSTAKE'}</button>
+              </div>
+              <p className="text-sm text-gray-300">Earn 8.5% APY - Multiplier grows 0.5%/week - Early withdrawal penalty</p>
+              {txSignature && (
+                <div className="mt-4 p-4 bg-green-500/20 rounded">
+                  <p className="text-sm">Transaction successful</p>
+                  <a href={'https://explorer.solana.com/tx/' + txSignature + '?cluster=devnet'} target="_blank" className="text-sm text-blue-400 underline break-all">View on Solana Explorer</a>
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur p-8 rounded-lg">
+              <h3 className="text-2xl font-bold mb-6">Earnings Calculator</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Amount to Stake (SOL)</label>
+                  <input type="number" value={calcAmount} onChange={(e) => setCalcAmount(e.target.value)} className="w-full bg-white/20 rounded px-4 py-3 text-white text-xl" placeholder="1.0" step="0.1" min="0.01" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Days to Hold</label>
+                  <input type="number" value={calcDays} onChange={(e) => setCalcDays(e.target.value)} className="w-full bg-white/20 rounded px-4 py-3 text-white text-xl" placeholder="365" step="1" min="1" />
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 p-6 rounded-lg border border-purple-500/30">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Projected Earnings</p>
+                    <p className="text-3xl font-bold text-green-400">{calcResults.earnings.toFixed(4)} SOL</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Your Multiplier</p>
+                    <p className="text-3xl font-bold text-yellow-400">{calcResults.multiplier.toFixed(2)}x</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Effective APY</p>
+                    <p className="text-3xl font-bold text-blue-400">{calcResults.effectiveAPY.toFixed(1)}%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mt-4 text-center">Based on 8.5% base APY + {calcResults.multiplier.toFixed(2)}x multiplier</p>
+              </div>
+            </div>
+
+            <ReferralCode />
+          </div>
+        ) : (
+          <div className="text-center text-white">
+            <p>Loading your data...</p>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
