@@ -187,7 +187,7 @@ export default function Tokenomics() {
                   <div className="bg-black/30 p-4 rounded-lg">
                     <p className="font-bold mb-2">Year 5</p>
                     <p className="text-3xl font-bold text-yellow-400 mb-2">-65%+</p>
-                    <p className="text-sm text-gray-400">Circulating supply: Circulating supply: <350M tokenslt;350M tokens</p>
+                    <p className="text-sm text-gray-400">Circulating supply: Less than 350M tokens</p>
                   </div>
                 </div>
               </div>
