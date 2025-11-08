@@ -1,6 +1,6 @@
 [build]
   base = "based-frontend"
-  publish = "based-frontend/.next"
+  publish = ".next"
   command = "npm run build"
 
 [[redirects]]
