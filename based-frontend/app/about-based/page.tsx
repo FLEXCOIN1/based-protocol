@@ -349,7 +349,7 @@ export default function AboutBased() {
           <h2 className="text-4xl font-bold mb-4">Join the BASED Revolution</h2>
           <p className="text-xl mb-8">Be first to know when we launch on mainnet</p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <a href="https://twitter.com/BASEDProtocol" target="_blank" rel="noopener noreferrer" 
+            <a href="https://twitter.com/basedproto78004" target="_blank" rel="noopener noreferrer" 
                className="bg-white text-purple-900 px-8 py-3 rounded-lg font-bold hover:bg-gray-100">
               Follow on Twitter 🐦
             </a>
