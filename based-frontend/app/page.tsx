@@ -129,7 +129,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4 justify-center mt-3">
           <a 
-            href="https://twitter.com/BasedProtocolSol" 
+            href="https://twitter.com/basedproto78004" 
             target="_blank" 
             rel="noopener noreferrer"
             className="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-all"
