@@ -34,7 +34,7 @@ export default function Home() {
   // Countdown timer to Dec 3, 2024
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const launchDate = new Date('2024-12-03T00:00:00Z').getTime();
+      const launchDate = new Date('2025-12-03T00:00:00Z').getTime();
       const now = new Date().getTime();
       const difference = launchDate - now;
 
