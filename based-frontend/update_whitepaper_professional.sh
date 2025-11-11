@@ -1,3 +1,10 @@
+#!/bin/bash
+
+echo "📝 Updating whitepaper with professional improvements..."
+
+cp app/whitepaper/page.tsx app/whitepaper/page.tsx.backup_professional
+
+cat > app/whitepaper/page.tsx << 'WHITEPAPERV2'
 'use client';
 
 import Link from 'next/link';
@@ -324,3 +331,17 @@ export default function Whitepaper() {
     </div>
   );
 }
+WHITEPAPERV2
+
+echo "✅ Whitepaper updated with professional improvements"
+echo ""
+echo "Changes:"
+echo "  • Moved critical disclaimer to top"
+echo "  • Clarified APY estimates as variable, not guaranteed"
+echo "  • Added specific audit details section"
+echo "  • Expanded risk disclosure with real exploit examples"
+echo "  • Added compliance/regulatory positioning section"
+echo "  • Added team transparency section"
+echo "  • Removed marketing language"
+echo "  • Emphasized utility/governance over profit expectations"
+
