@@ -11,9 +11,9 @@ export default function HowItWorks() {
           <Link href="/">
             <h1 className="text-3xl font-bold text-blue-600 cursor-pointer">BASED Reserve</h1>
           </Link>
-          <Link href="/leaderboard" className="text-gray-700 hover:text-blue-600">Wealth Rankings</Link>
           <Link href="/how-it-works" className="text-blue-600 font-bold">How It Works</Link>
           <Link href="/tokenomics" className="text-gray-700 hover:text-blue-600">Tokenomics</Link>
+          <Link href="/about-based" className="text-gray-700 hover:text-blue-600">About $BSOL</Link>
           <Link href="/faq" className="text-gray-700 hover:text-blue-600">FAQ</Link>
         </div>
         <WalletButton />
@@ -32,7 +32,7 @@ export default function HowItWorks() {
           <div className="space-y-4">
             <div className="bg-gray-50 border-l-4 border-gray-400 p-6 rounded-r-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-bold text-gray-900">📄 Basic Account</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Basic Account</h3>
                 <span className="text-sm text-gray-600">Week 0-4</span>
               </div>
               <p className="text-gray-700 mb-2">1.0X multiplier • 8.5% APY</p>
@@ -41,7 +41,7 @@ export default function HowItWorks() {
 
             <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-bold text-gray-900">💪 Growth Account</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Growth Account</h3>
                 <span className="text-sm text-gray-600">Week 5-9</span>
               </div>
               <p className="text-gray-700 mb-2">1.5X multiplier • 12.75% APY</p>
@@ -50,7 +50,7 @@ export default function HowItWorks() {
 
             <div className="bg-blue-100 border-l-4 border-blue-600 p-6 rounded-r-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-bold text-gray-900">💎 Premium Account</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Premium Account</h3>
                 <span className="text-sm text-gray-600">Week 10-19</span>
               </div>
               <p className="text-gray-700 mb-2">2.0X multiplier • 17% APY</p>
@@ -59,7 +59,7 @@ export default function HowItWorks() {
 
             <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-r-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-bold text-gray-900">🦍 Elite Reserve</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Elite Reserve</h3>
                 <span className="text-sm text-gray-600">Week 20-49</span>
               </div>
               <p className="text-gray-700 mb-2">3.0X multiplier • 25.5% APY</p>
@@ -68,7 +68,7 @@ export default function HowItWorks() {
 
             <div className="bg-purple-50 border-l-4 border-purple-600 p-6 rounded-r-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-bold text-gray-900">🚀 Platinum Reserve</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Platinum Reserve</h3>
                 <span className="text-sm text-gray-600">Week 50-99</span>
               </div>
               <p className="text-gray-700 mb-2">5.0X multiplier • 42.5% APY</p>
@@ -77,7 +77,7 @@ export default function HowItWorks() {
 
             <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-600 p-6 rounded-r-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-bold text-gray-900">👑 Chairman's Circle</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Chairman's Circle</h3>
                 <span className="text-sm text-gray-600">Week 100+</span>
               </div>
               <p className="text-gray-700 mb-2">10X multiplier • 85% APY</p>
