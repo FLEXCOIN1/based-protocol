@@ -1,3 +1,10 @@
+#!/bin/bash
+
+echo "🔧 Complete homepage fix with countdown + whitepaper nav..."
+
+cp app/page.tsx app/page.tsx.backup_complete
+
+cat > app/page.tsx << 'HOMECOMPLETE'
 'use client';
 
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
@@ -348,3 +355,7 @@ export default function Home() {
     </div>
   );
 }
+HOMECOMPLETE
+
+echo "✅ Homepage completely fixed: countdown + whitepaper + GitHub"
+
