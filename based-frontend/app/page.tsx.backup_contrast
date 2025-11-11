@@ -30,7 +30,7 @@ export default function Home() {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const launchDate = new Date('November 18, 2025 00:00:00 UTC').getTime();
+      const launchDate = new Date('December 3, 2025 00:00:00 UTC').getTime();
       const now = new Date().getTime();
       const difference = launchDate - now;
 
@@ -131,7 +131,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="inline-block bg-blue-500 bg-opacity-30 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                  Launching Monday, November 18, 2025
+                  Launching December 3, 2025
                 </div>
                 <h1 className="text-5xl font-bold mb-6 leading-tight">
                   Decentralized Social Banking on Solana
@@ -153,24 +153,24 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="bg-white border-2 border-blue-300 shadow-lg rounded-lg p-8">
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-lg p-8">
                 <h3 className="text-2xl font-bold mb-6">Launch Countdown</h3>
                 <div className="grid grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-4xl font-bold">{timeLeft.days}</div>
-                    <div className="text-sm text-gray-500">Days</div>
+                    <div className="text-sm text-blue-200">Days</div>
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold">{timeLeft.hours}</div>
-                    <div className="text-sm text-gray-500">Hours</div>
+                    <div className="text-sm text-blue-200">Hours</div>
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold">{timeLeft.minutes}</div>
-                    <div className="text-sm text-gray-500">Minutes</div>
+                    <div className="text-sm text-blue-200">Minutes</div>
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold">{timeLeft.seconds}</div>
-                    <div className="text-sm text-gray-500">Seconds</div>
+                    <div className="text-sm text-blue-200">Seconds</div>
                   </div>
                 </div>
               </div>

@@ -196,7 +196,7 @@ export default function FAQ() {
           <div className="bg-white border border-gray-200 rounded-lg p-8">
             <h2 className="text-2xl font-bold mb-3 text-gray-900">When is mainnet launch?</h2>
             <p className="text-gray-700">
-              We're currently testing on Solana devnet. Mainnet launch is scheduled for <strong>December 3, 2025</strong>. 
+              We're currently testing on Solana devnet. Mainnet launch is scheduled for <strong>November 18, 2025</strong>. 
               First 100 stakers receive a permanent 2X Founders Bonus on all rewards.
             </p>
           </div>
