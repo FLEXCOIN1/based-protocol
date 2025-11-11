@@ -58,7 +58,7 @@ export default function PoolSelector({ selectedPool, onPoolChange }: PoolSelecto
           }`}
         >
           <div className="text-6xl mb-4">🔥</div>
-          <h3 className="text-2xl font-bold text-white mb-2">$BASED Staking</h3>
+          <h3 className="text-2xl font-bold text-white mb-2">$BSOL Staking</h3>
           <p className="text-gray-300 mb-4">High yield, high reward</p>
           <div className="space-y-2 text-left">
             <div className="flex justify-between">
@@ -71,7 +71,7 @@ export default function PoolSelector({ selectedPool, onPoolChange }: PoolSelecto
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Rewards:</span>
-              <span className="font-bold text-purple-400">$BASED</span>
+              <span className="font-bold text-purple-400">$BSOL</span>
             </div>
           </div>
           {selectedPool === 'based' && (

@@ -1,3 +1,19 @@
+#!/bin/bash
+
+echo "🏦 Starting BASED Reserve complete rebrand..."
+
+# Backup all files
+cp app/page.tsx app/page.tsx.backup
+cp app/faq/page.tsx app/faq/page.tsx.backup
+cp app/about-based/page.tsx app/about-based/page.tsx.backup
+cp app/how-it-works/page.tsx app/how-it-works/page.tsx.backup
+cp app/tokenomics/page.tsx app/tokenomics/page.tsx.backup
+cp app/leaderboard/page.tsx app/leaderboard/page.tsx.backup
+
+echo "✅ Backups created"
+
+# Update FAQ page
+cat > app/faq/page.tsx << 'FAQEOF'
 'use client';
 
 import Link from 'next/link';
@@ -124,3 +140,8 @@ export default function FAQ() {
     </div>
   );
 }
+FAQEOF
+
+echo "✅ FAQ page updated to professional banking design"
+echo "🎉 Done! Check the changes."
+
