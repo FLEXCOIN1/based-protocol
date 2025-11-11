@@ -1,3 +1,13 @@
+#!/bin/bash
+
+echo "🔧 Adding PoolSelector to homepage after wallet connection..."
+
+cp app/page.tsx app/page.tsx.backup_pool
+
+# Find the line with "Trust Indicators" closing div and insert PoolSelector section after it
+# We'll add it right after the trust indicators section
+
+cat > app/page.tsx << 'POOLFIX'
 'use client';
 
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
@@ -323,3 +333,8 @@ export default function Home() {
     </div>
   );
 }
+POOLFIX
+
+echo "✅ PoolSelector added to homepage"
+echo "✅ Will show after wallet connection"
+
