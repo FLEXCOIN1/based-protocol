@@ -12,13 +12,13 @@ security_txt! {
 }
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::{self, Transfer};
 
 mod token_staking;
 use token_staking::*;
 
-declare_id!("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
+declare_id!("DGVsFppxXqsuLPtF2oYvfh3uccdvGMGEVi4ZxuaQu5RU");
 
 // Constants
 const VESTING_DURATION: i64 = 31536000; // 12 months in seconds
@@ -26,6 +26,7 @@ const EARLY_WITHDRAWAL_PENALTY_BPS: u64 = 1000; // 10% penalty (basis points)
 const MAX_MULTIPLIER_BPS: u64 = 10000; // 10X max multiplier (10000 = 10.00X)
 const MULTIPLIER_GROWTH_RATE: u64 = 50; // 0.5% per week (50 bps)
 const REFERRAL_REWARD_BPS: u64 = 1000; // 10% of penalties go to referrer
+const PLATFORM_FEE_BPS: u64 = 200; // 2% platform fee
 
 #[program]
 pub mod based_protocol {
@@ -639,29 +640,14 @@ pub mod based_protocol {
         Ok(())
     }
 
-
-    pub fn withdraw_treasury(
-        ctx: Context<WithdrawTreasury>,
-        amount: u64,
-    ) -> Result<()> {
-        **ctx.accounts.treasury.to_account_info().try_borrow_mut_lamports()? = ctx
-            .accounts
-            .treasury
-            .to_account_info()
-            .lamports()
-            .checked_sub(amount)
-            .ok_or(ErrorCode::InsufficientFunds)?;
-
-        **ctx.accounts.recipient.to_account_info().try_borrow_mut_lamports()? = ctx
-            .accounts
-            .recipient
-            .to_account_info()
-            .lamports()
-            .checked_add(amount)
-            .ok_or(ErrorCode::MathOverflow)?;
-
-        msg!("Withdrew {} lamports from treasury", amount);
-        Ok(())
+    pub fn get_multiplier(lock_days: u64) -> u64 {
+        match lock_days {
+            90 => 150,
+            180 => 250,
+            365 => 500,
+            730 => 1000,
+            _ => 100,
+        }
     }
 }
 
@@ -851,25 +837,8 @@ pub struct CreateLock<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[derive(Accounts)]
-pub struct WithdrawTreasury<'info> {
-    #[account(mut)]
-    pub pool: Account<'info, StakingPool>,
-    
-    #[account(mut)]
-    pub treasury: SystemAccount<'info>,
-    
-    #[account(mut)]
-    pub recipient: SystemAccount<'info>,
-    
-    pub authority: Signer<'info>,
-    pub system_program: Program<'info, System>,
-}
-
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Unauthorized access")]
-    Unauthorized,
     #[msg("Insufficient funds to withdraw")]
     InsufficientFunds,
     #[msg("Math overflow")]
