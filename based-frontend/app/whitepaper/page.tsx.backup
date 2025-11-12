@@ -250,8 +250,8 @@ export default function Whitepaper() {
               <p>All smart contract code is open source. All transactions are publicly verifiable on Solana blockchain.</p>
             </div>
             <div className="border-l-4 border-blue-600 pl-4">
-              <p className="font-bold text-gray-900">Progressive Decentralization</p>
-              <p>Launch: Authority-controlled for security & speed. Milestone: Governance transitions to token holders at 10K+ users. Strategy: Earn decentralization through execution.</p>
+              <p className="font-bold text-gray-900">Community Governance</p>
+              <p>Protocol decisions are made by token holder votes, not centralized management.</p>
             </div>
             <div className="border-l-4 border-blue-600 pl-4">
               <p className="font-bold text-gray-900">Compliance Monitoring</p>

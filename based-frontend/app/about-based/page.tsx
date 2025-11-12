@@ -105,10 +105,10 @@ export default function AboutBased() {
           </div>
 
           <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Community Governance</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Progressive Decentralization</h3>
             <p className="text-gray-700">
-              $BSOL holders vote on protocol decisions: fee structures, new features, treasury allocation. 
-              This isn't a centralized bank - it's truly community-owned financial infrastructure.
+              Phase 1 launches with centralized control for rapid iteration and security. As the protocol matures and reaches 10,000+ active stakers, governance will progressively transition to $BSOL holders. 
+              We believe in earning decentralization through proven execution, not promising it on day one.
             </p>
           </div>
         </div>
