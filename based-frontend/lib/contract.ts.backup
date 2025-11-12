@@ -1,5 +1,5 @@
 import { Program, AnchorProvider } from '@coral-xyz/anchor';
-import { PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { getConnection, PROGRAM_ID, rpcManager } from './config';
 import { IDL } from './idl';
 import { AnchorWallet } from './anchorWallet';
@@ -36,28 +36,4 @@ export async function retryWithFailover<T>(
   }
   
   throw lastError || new Error('All retry attempts failed');
-}
-
-export async function getUserStake(program: Program, userPubkey: PublicKey) {
-  return retryWithFailover(async () => {
-    return await program.account.userStake.fetch(userPubkey);
-  });
-}
-
-export async function claimRewards(program: Program, userPubkey: PublicKey) {
-  return retryWithFailover(async () => {
-    return await program.methods
-      .claimRewards()
-      .accounts({ user: userPubkey })
-      .rpc();
-  });
-}
-
-export async function claimReferralRewards(program: Program, userPubkey: PublicKey) {
-  return retryWithFailover(async () => {
-    return await program.methods
-      .claimReferralRewards()
-      .accounts({ user: userPubkey })
-      .rpc();
-  });
 }
