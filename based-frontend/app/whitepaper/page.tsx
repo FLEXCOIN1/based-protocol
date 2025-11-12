@@ -207,7 +207,6 @@ export default function Whitepaper() {
             </div>
             <div className="bg-yellow-50 border-l-4 border-yellow-600 p-4 rounded-r">
               <p className="font-bold text-gray-900 mb-2">Flash Loan Exploits</p>
-              <p className="text-gray-700"><strong>Mitigation:</strong> Withdrawal delays and rate limiting prevent instant capital extraction. Tier progression based on time-locked deposits.</p>
             </div>
           </div>
 

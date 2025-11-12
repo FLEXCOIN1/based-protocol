@@ -185,7 +185,6 @@ export default function Growth() {
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-purple-600 mt-1">•</span>
-                        <span>6-tier gamification system live</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-purple-600 mt-1">•</span>

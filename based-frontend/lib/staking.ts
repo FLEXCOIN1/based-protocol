@@ -2,7 +2,6 @@ import { PublicKey } from '@solana/web3.js';
 import { getProgram, retryWithFailover } from './contract';
 import { AnchorWallet } from './anchorWallet';
 import { getUserProgress, updateLoginStreak, updateTotalStaked } from './userProgress';
-import { calculateLevel, getUnlockedAchievements } from './gamification';
 import { handleError, getUserFriendlyError } from './errorHandler';
 import { rateLimiter } from './rateLimiter';
 

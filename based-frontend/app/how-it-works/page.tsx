@@ -47,7 +47,6 @@ export default function HowItWorks() {
                   <span className="font-bold text-green-600">85%</span>
                 </div>
                 <div className="flex justify-between pb-2 border-b border-gray-200">
-                  <span className="font-medium">Risk Level:</span>
                   <span className="font-bold text-blue-600">Lower</span>
                 </div>
                 <div className="flex justify-between">
@@ -78,7 +77,6 @@ export default function HowItWorks() {
                   <span className="font-bold text-green-600">500-1000%</span>
                 </div>
                 <div className="flex justify-between pb-2 border-b border-gray-200">
-                  <span className="font-medium">Risk Level:</span>
                   <span className="font-bold text-orange-600">Higher</span>
                 </div>
                 <div className="flex justify-between">
@@ -102,9 +100,7 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* Account Tiers */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-gray-900">Account Tier System</h2>
           <p className="text-gray-700 mb-8 text-lg">
             Both SOL and $BSOL staking use the same tier progression. The longer you stake, the higher your multiplier:
           </p>
@@ -192,7 +188,6 @@ export default function HowItWorks() {
               <div className="flex gap-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-lg">4</div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Advance Through Tiers</h3>
                   <p className="text-gray-700">Your account tier increases automatically as weeks pass, unlocking higher multipliers.</p>
                 </div>
               </div>

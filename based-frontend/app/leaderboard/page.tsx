@@ -5,7 +5,6 @@ import WalletButton from '@/components/WalletButton';
 import { useState, useEffect } from 'react';
 import { getProgram } from '@/lib/contract';
 import { AnchorWallet } from '@/lib/anchorWallet';
-import { calculateLevel } from '@/lib/gamification';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
@@ -44,7 +43,6 @@ export default function Leaderboard() {
             const now = Math.floor(Date.now() / 1000);
             const secondsStaked = vestingStart > 0 ? now - vestingStart : 0;
             const weeksStaked = secondsStaked / (7 * 24 * 60 * 60);
-            const level = calculateLevel(weeksStaked);
 
             setLeaderboard([{
               rank: 1,
@@ -93,7 +91,6 @@ export default function Leaderboard() {
           const now = Math.floor(Date.now() / 1000);
           const secondsStaked = vestingStart > 0 ? now - vestingStart : 0;
           const weeksStaked = secondsStaked / (7 * 24 * 60 * 60);
-          const level = calculateLevel(weeksStaked);
 
           const staked = (userAccount.amount?.toNumber() || 0) / 1_000_000_000;
 
@@ -217,7 +214,6 @@ export default function Leaderboard() {
                 <thead className="bg-white/5 border-b border-white/10">
                   <tr>
                     <th className="p-4 text-left">Rank</th>
-                    <th className="p-4 text-left">Level</th>
                     <th className="p-4 text-left">Address</th>
                     <th className="p-4 text-right">Staked</th>
                     <th className="p-4 text-right">Multiplier</th>
