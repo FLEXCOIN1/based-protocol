@@ -27,26 +27,29 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
   try {
     const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    // Check if protocol is initialized
+    // Check protocol state
     const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
-    
-    console.log("Checking protocol state:", state.toString());
     const stateAccount = await freshConnection.getAccountInfo(state);
     
     if (!stateAccount) {
-      throw new Error("❌ PROTOCOL NOT INITIALIZED!\n\nThe admin needs to run the 'initialize' instruction first.\n\nState PDA: " + state.toString());
+      throw new Error("❌ PROTOCOL NOT INITIALIZED! State PDA: " + state.toString());
     }
     
-    console.log("✅ Protocol state exists");
+    console.log("✅ Protocol initialized");
 
-    // Find other PDAs
+    // Find PDAs
     const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
     const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
     const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
 
-    console.log("✅ All PDAs calculated");
+    console.log("PDAs:", {
+      state: state.toString(),
+      userStake: userStake.toString(),
+      vault: vault.toString(),
+      stakeAccount: stakeAccount.toString()
+    });
 
-    // Build instruction data
+    // Build instruction
     const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
     const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
     const amountBytes = encodeU64(amountLamports);
@@ -78,22 +81,41 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
     const transaction = new Transaction().add(instruction);
     transaction.feePayer = wallet.publicKey;
     
-    const { blockhash } = await freshConnection.getLatestBlockhash('finalized');
+    const { blockhash } = await freshConnection.getLatestBlockhash('confirmed');
     transaction.recentBlockhash = blockhash;
 
-    console.log("✅ Transaction ready, sending to Phantom...");
+    console.log("Transaction built. Simulating...");
+
+    // SIMULATE FIRST to see the real error
+    try {
+      const simulation = await freshConnection.simulateTransaction(transaction);
+      
+      if (simulation.value.err) {
+        console.error("❌ SIMULATION FAILED:", simulation.value.err);
+        console.error("Logs:", simulation.value.logs);
+        throw new Error("Transaction simulation failed: " + JSON.stringify(simulation.value.err));
+      }
+      
+      console.log("✅ Simulation passed!");
+      console.log("Logs:", simulation.value.logs);
+    } catch (simError: any) {
+      console.error("❌ Simulation error:", simError);
+      throw simError;
+    }
+
+    console.log("Sending to Phantom...");
     
     const signature = await wallet.sendTransaction(transaction, freshConnection);
     
-    console.log("✅ TX SENT:", signature);
-    console.log("🔗 https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
+    console.log("✅ SENT:", signature);
+    console.log("https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
     
     await freshConnection.confirmTransaction(signature, 'confirmed');
-    console.log("✅ STAKE COMPLETE!");
+    console.log("✅ CONFIRMED!");
     
     return signature;
   } catch (error: any) {
-    console.error("❌ Error:", error.message || error);
+    console.error("❌ ERROR:", error.message || error);
     throw error;
   }
 }
