@@ -1,118 +1,76 @@
-import { PublicKey, SystemProgram, SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
-import { getProgram, retryWithFailover } from './contract';
-import { AnchorWallet } from './anchorWallet';
-import { handleError, getUserFriendlyError } from './errorHandler';
-import { rateLimiter } from './rateLimiter';
+import * as anchor from "@coral-xyz/anchor";
+import { Program, AnchorProvider, BN } from "@coral-xyz/anchor";
+import { Connection, PublicKey, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import idl from "./idl.json";
 
-const STAKE_PROGRAM_ID = new PublicKey('Stake11111111111111111111111111111111111111');
-const VALIDATOR_VOTE = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
-const STAKE_CONFIG = new PublicKey('StakeConfig11111111111111111111111111111111');
-const STAKE_HISTORY = new PublicKey('SysvarStakeHistory1111111111111111111111111');
+const PROGRAM_ID = new PublicKey("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
 
-export async function depositSOL(
-  walletPublicKey: PublicKey,
-  amount: number,
-  wallet: any
-) {
-  const rateCheck = rateLimiter.check(walletPublicKey.toBase58());
-  if (!rateCheck.allowed) {
-    throw new Error(`Rate limit exceeded. Try again in ${rateCheck.resetIn} seconds.`);
-  }
-
+async function accountExists(connection: Connection, address: PublicKey): Promise<boolean> {
   try {
-    return await retryWithFailover(async () => {
-      const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
-      const program = await getProgram(anchorWallet);
-
-      // Convert SOL to lamports
-      const amountLamports = Math.floor(amount * 1_000_000_000);
-
-      // Validator vote account (devnet validator)
-      const validatorVote = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
-
-      // Call create_stake_account - Anchor will auto-derive PDAs from the IDL
-      const signature = await program.methods
-        .createStakeAccount(amountLamports, validatorVote)
-        .accounts({
-          user: walletPublicKey,
-        })
-        .rpc();
-
-      console.log('✅ Stake successful! Transaction:', signature);
-      return signature;
-    });
-  } catch (error: any) {
-    handleError(error, {
-      action: 'stake',
-      walletAddress: walletPublicKey.toBase58(),
-      amount,
-    });
-    throw new Error(getUserFriendlyError(error));
+    const accountInfo = await connection.getAccountInfo(address);
+    return accountInfo !== null;
+  } catch (error) {
+    return false;
   }
 }
 
-export async function getUserStake(walletPublicKey: PublicKey, wallet: any) {
+export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
+  if (!wallet.publicKey) throw new Error("Wallet not connected");
+
+  const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
+  const program = new Program(idl as any, PROGRAM_ID, provider);
+
+  const [userStakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("user-stake"), wallet.publicKey.toBuffer()], program.programId);
+  const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], program.programId);
+
+  const userAccountExists = await accountExists(connection, userStakeAccount);
+
   try {
-    const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
-    const program = await getProgram(anchorWallet);
-
-    // Let Anchor auto-derive the PDA
-    const [userStake] = PublicKey.findProgramAddressSync(
-      [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
-      program.programId
-    );
-
-    // Try to fetch the account - don't retry if it doesn't exist
-    try {
-      return await program.account.userStake.fetch(userStake);
-    } catch (fetchError: any) {
-      // Check if account doesn't exist (expected for new users)
-      const errorMsg = fetchError?.message || fetchError?.toString() || '';
-      if (errorMsg.includes('Account does not exist') ||
-          errorMsg.includes('AccountNotInitialized') ||
-          errorMsg.includes('Invalid account discriminator')) {
-        // Account doesn't exist yet - user hasn't staked
-        return null;
-      }
-      // For other errors (network issues), throw to trigger retry
-      throw fetchError;
+    let txSignature: string;
+    if (!userAccountExists) {
+      console.log("New user - initializing...");
+      txSignature = await program.methods.initialize().accounts({user: wallet.publicKey, userStakeAccount, systemProgram: SystemProgram.programId}).rpc();
+      await connection.confirmTransaction(txSignature, "confirmed");
+      const stakeAmount = new BN(amount * LAMPORTS_PER_SOL);
+      txSignature = await program.methods.stake(stakeAmount).accounts({user: wallet.publicKey, userStakeAccount, vault, systemProgram: SystemProgram.programId}).rpc();
+    } else {
+      console.log("Existing user - staking...");
+      const stakeAmount = new BN(amount * LAMPORTS_PER_SOL);
+      txSignature = await program.methods.stake(stakeAmount).accounts({user: wallet.publicKey, userStakeAccount, vault, systemProgram: SystemProgram.programId}).rpc();
     }
+    return txSignature;
   } catch (error: any) {
-    // Network errors or other issues - return null gracefully
-    console.log('Could not fetch user stake:', error.message);
-    return null;
+    throw new Error(`Failed to stake: ${error.message || error}`);
   }
 }
 
-export async function getStakeInfo(walletPublicKey: PublicKey, wallet: any) {
+export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
+  if (!wallet.publicKey) throw new Error("Wallet not connected");
+  const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
+  const program = new Program(idl as any, PROGRAM_ID, provider);
+  const [userStakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("user-stake"), wallet.publicKey.toBuffer()], program.programId);
+  const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], program.programId);
+  const userAccountExists = await accountExists(connection, userStakeAccount);
+  if (!userAccountExists) throw new Error("No stake account found. You must stake first.");
   try {
-    const stakeData = await getUserStake(walletPublicKey, wallet);
-
-    if (!stakeData) {
-      return {
-        amount: 0,
-        rewardsEarned: 0,
-        lastStakeTime: 0,
-        stakeAccount: '',
-      };
-    }
-
-    // Convert BN to number, handling lamports (1 SOL = 1B lamports)
-    return {
-      amount: stakeData.amount?.toNumber() / 1_000_000_000 || 0,
-      rewardsEarned: stakeData.rewardsEarned?.toNumber() / 1_000_000_000 || 0,
-      lastStakeTime: stakeData.lastStakeTime?.toNumber() || 0,
-      stakeAccount: stakeData.stakeAccount?.toString() || '',
-    };
+    const unstakeAmount = new BN(amount * LAMPORTS_PER_SOL);
+    const txSignature = await program.methods.unstake(unstakeAmount).accounts({user: wallet.publicKey, userStakeAccount, vault, systemProgram: SystemProgram.programId}).rpc();
+    return txSignature;
   } catch (error: any) {
-    console.error('Error fetching stake info:', error);
-    return {
-      amount: 0,
-      rewardsEarned: 0,
-      lastStakeTime: 0,
-      stakeAccount: '',
-    };
+    throw new Error(`Failed to unstake: ${error.message || error}`);
   }
 }
 
-export const CURRENT_APY = 7.0;
+export async function getUserStakeInfo(walletAddress: PublicKey, connection: Connection): Promise<any> {
+  const provider = new AnchorProvider(connection, {} as any, AnchorProvider.defaultOptions());
+  const program = new Program(idl as any, PROGRAM_ID, provider);
+  const [userStakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("user-stake"), walletAddress.toBuffer()], program.programId);
+  const userAccountExists = await accountExists(connection, userStakeAccount);
+  if (!userAccountExists) return {stakedAmount: new BN(0), lastStakeTime: new BN(0), tier: 0, exists: false};
+  try {
+    const stakeInfo = await program.account.userStakeAccount.fetch(userStakeAccount);
+    return {...stakeInfo, exists: true};
+  } catch (error) {
+    return {stakedAmount: new BN(0), lastStakeTime: new BN(0), tier: 0, exists: false};
+  }
+}
