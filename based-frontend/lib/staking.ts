@@ -5,6 +5,9 @@ import idl from "./idl.json";
 
 const PROGRAM_ID = new PublicKey("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
 
+// Export the APY constant that page.tsx expects
+export const CURRENT_APY = 8.5;
+
 async function accountExists(connection: Connection, address: PublicKey): Promise<boolean> {
   try {
     const accountInfo = await connection.getAccountInfo(address);
@@ -44,6 +47,9 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
   }
 }
 
+// Alias for page.tsx compatibility
+export const depositSOL = stakeSOL;
+
 export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
   if (!wallet.publicKey) throw new Error("Wallet not connected");
   const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
@@ -74,3 +80,6 @@ export async function getUserStakeInfo(walletAddress: PublicKey, connection: Con
     return {stakedAmount: new BN(0), lastStakeTime: new BN(0), tier: 0, exists: false};
   }
 }
+
+// Alias for page.tsx compatibility
+export const getStakeInfo = getUserStakeInfo;
