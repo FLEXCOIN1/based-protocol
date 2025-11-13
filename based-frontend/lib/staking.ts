@@ -43,6 +43,16 @@ export async function depositSOL(
       const signature = await program.methods
         .deposit(amountLamports, null) // amount in lamports, no referrer
         .accounts({
+          voteAccount: VALIDATOR_VOTE,
+          systemProgram: SystemProgram.programId,
+          stakeProgram: STAKE_PROGRAM_ID,
+          rent: SYSVAR_RENT_PUBKEY,
+          clock: SYSVAR_CLOCK_PUBKEY,
+          stakeHistory: STAKE_HISTORY,
+          stakeConfig: STAKE_CONFIG,
+        })
+        .rpc();
+
           user: walletPublicKey,
         })
         .rpc();
