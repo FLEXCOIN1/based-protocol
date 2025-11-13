@@ -18,109 +18,110 @@ function encodeU64(value: number): Uint8Array {
 }
 
 export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
-  if (!wallet.publicKey || !wallet.connected) {
-    throw new Error("Wallet not connected");
-  }
+  if (!wallet.publicKey || !wallet.connected) throw new Error("Wallet not connected");
 
-  console.log("=== STAKING", amount, "SOL ===");
+  const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+  const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
+  const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
+  const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
+  const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
 
+  const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
+  const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
+  const amountBytes = encodeU64(amountLamports);
+  const validatorBytes = DEFAULT_VALIDATOR.toBytes();
+  
+  const data = new Uint8Array(discriminator.length + amountBytes.length + validatorBytes.length);
+  data.set(discriminator, 0);
+  data.set(amountBytes, discriminator.length);
+  data.set(validatorBytes, discriminator.length + amountBytes.length);
+
+  const instruction = new TransactionInstruction({
+    keys: [
+      { pubkey: state, isSigner: false, isWritable: true },
+      { pubkey: userStake, isSigner: false, isWritable: true },
+      { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+      { pubkey: vault, isSigner: false, isWritable: true },
+      { pubkey: stakeAccount, isSigner: false, isWritable: true },
+      { pubkey: DEFAULT_VALIDATOR, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      { pubkey: STAKE_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
+      { pubkey: SYSVAR_STAKE_HISTORY_PUBKEY, isSigner: false, isWritable: false },
+      { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
+    ],
+    programId: PROGRAM_ID,
+    data: Buffer.from(data),
+  });
+
+  const transaction = new Transaction().add(instruction);
+  transaction.feePayer = wallet.publicKey;
+  const { blockhash } = await freshConnection.getLatestBlockhash('confirmed');
+  transaction.recentBlockhash = blockhash;
+  
+  const signature = await wallet.sendTransaction(transaction, freshConnection);
+  await freshConnection.confirmTransaction(signature, 'confirmed');
+  return signature;
+}
+
+export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
+  if (!wallet.publicKey || !wallet.connected) throw new Error("Wallet not connected");
+
+  const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+  const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
+  const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
+  const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
+
+  // Unstake discriminator from IDL
+  const discriminator = new Uint8Array([90, 95, 107, 42, 205, 124, 50, 225]);
+  const amountBytes = encodeU64(Math.floor(amount * LAMPORTS_PER_SOL));
+  const data = new Uint8Array(discriminator.length + amountBytes.length);
+  data.set(discriminator, 0);
+  data.set(amountBytes, discriminator.length);
+
+  const instruction = new TransactionInstruction({
+    keys: [
+      { pubkey: state, isSigner: false, isWritable: true },
+      { pubkey: userStake, isSigner: false, isWritable: true },
+      { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+      { pubkey: vault, isSigner: false, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    programId: PROGRAM_ID,
+    data: Buffer.from(data),
+  });
+
+  const transaction = new Transaction().add(instruction);
+  transaction.feePayer = wallet.publicKey;
+  const { blockhash } = await freshConnection.getLatestBlockhash('confirmed');
+  transaction.recentBlockhash = blockhash;
+  
+  const signature = await wallet.sendTransaction(transaction, freshConnection);
+  await freshConnection.confirmTransaction(signature, 'confirmed');
+  return signature;
+}
+
+export async function getUserStakeInfo(walletAddress: PublicKey, connection: Connection): Promise<any> {
   try {
     const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+    const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), walletAddress.toBuffer()], PROGRAM_ID);
 
-    // Check protocol state
-    const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
-    const stateAccount = await freshConnection.getAccountInfo(state);
+    const account = await freshConnection.getAccountInfo(userStake);
     
-    if (!stateAccount) {
-      throw new Error("❌ PROTOCOL NOT INITIALIZED! State PDA: " + state.toString());
-    }
-    
-    console.log("✅ Protocol initialized");
-
-    // Find PDAs
-    const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
-    const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
-    const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
-
-    console.log("PDAs:", {
-      state: state.toString(),
-      userStake: userStake.toString(),
-      vault: vault.toString(),
-      stakeAccount: stakeAccount.toString()
-    });
-
-    // Build instruction
-    const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
-    const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
-    const amountBytes = encodeU64(amountLamports);
-    const validatorBytes = DEFAULT_VALIDATOR.toBytes();
-    
-    const data = new Uint8Array(discriminator.length + amountBytes.length + validatorBytes.length);
-    data.set(discriminator, 0);
-    data.set(amountBytes, discriminator.length);
-    data.set(validatorBytes, discriminator.length + amountBytes.length);
-
-    const instruction = new TransactionInstruction({
-      keys: [
-        { pubkey: state, isSigner: false, isWritable: true },
-        { pubkey: userStake, isSigner: false, isWritable: true },
-        { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
-        { pubkey: vault, isSigner: false, isWritable: true },
-        { pubkey: stakeAccount, isSigner: false, isWritable: true },
-        { pubkey: DEFAULT_VALIDATOR, isSigner: false, isWritable: false },
-        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-        { pubkey: STAKE_PROGRAM_ID, isSigner: false, isWritable: false },
-        { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
-        { pubkey: SYSVAR_STAKE_HISTORY_PUBKEY, isSigner: false, isWritable: false },
-        { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
-      ],
-      programId: PROGRAM_ID,
-      data: Buffer.from(data),
-    });
-
-    const transaction = new Transaction().add(instruction);
-    transaction.feePayer = wallet.publicKey;
-    
-    const { blockhash } = await freshConnection.getLatestBlockhash('confirmed');
-    transaction.recentBlockhash = blockhash;
-
-    console.log("Transaction built. Simulating...");
-
-    // SIMULATE FIRST to see the real error
-    try {
-      const simulation = await freshConnection.simulateTransaction(transaction);
-      
-      if (simulation.value.err) {
-        console.error("❌ SIMULATION FAILED:", simulation.value.err);
-        console.error("Logs:", simulation.value.logs);
-        throw new Error("Transaction simulation failed: " + JSON.stringify(simulation.value.err));
-      }
-      
-      console.log("✅ Simulation passed!");
-      console.log("Logs:", simulation.value.logs);
-    } catch (simError: any) {
-      console.error("❌ Simulation error:", simError);
-      throw simError;
+    if (!account || account.data.length === 0) {
+      return { amount: 0, exists: false };
     }
 
-    console.log("Sending to Phantom...");
+    // Manual deserialization - skip discriminator (8 bytes)
+    const data = account.data;
+    const amount = Number(data.readBigUInt64LE(40)); // owner(32) + amount(8) starts at byte 40
     
-    const signature = await wallet.sendTransaction(transaction, freshConnection);
-    
-    console.log("✅ SENT:", signature);
-    console.log("https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
-    
-    await freshConnection.confirmTransaction(signature, 'confirmed');
-    console.log("✅ CONFIRMED!");
-    
-    return signature;
-  } catch (error: any) {
-    console.error("❌ ERROR:", error.message || error);
-    throw error;
+    return { amount, exists: true };
+  } catch (error) {
+    console.error("Error fetching stake:", error);
+    return { amount: 0, exists: false };
   }
 }
 
 export const depositSOL = stakeSOL;
-export async function unstakeSOL() { throw new Error("Not implemented"); }
-export async function getUserStakeInfo() { return { amount: 0, exists: false }; }
 export const getStakeInfo = getUserStakeInfo;
