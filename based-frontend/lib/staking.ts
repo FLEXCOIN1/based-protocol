@@ -23,35 +23,10 @@ export async function depositSOL(
     return await retryWithFailover(async () => {
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
       const program = await getProgram(anchorWallet);
-      
-      const [state] = PublicKey.findProgramAddressSync(
-        [Buffer.from('state')],
-        program.programId
-      );
-      
-      const [vault] = PublicKey.findProgramAddressSync(
-        [Buffer.from('vault')],
-        program.programId
-      );
-      
-      const [userStake] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
-        program.programId
-      );
-      
-      const [stakeAccount] = PublicKey.findProgramAddressSync(
-        [Buffer.from('stake'), walletPublicKey.toBuffer()],
-        program.programId
-      );
-      
+
       const signature = await program.methods
         .createStakeAccount(amount, VALIDATOR_VOTE)
         .accounts({
-          state: state,
-          userStake: userStake,
-          user: walletPublicKey,
-          vault: vault,
-          stakeAccount: stakeAccount,
           voteAccount: VALIDATOR_VOTE,
           systemProgram: SystemProgram.programId,
           stakeProgram: STAKE_PROGRAM_ID,
@@ -61,7 +36,7 @@ export async function depositSOL(
           stakeConfig: STAKE_CONFIG,
         })
         .rpc();
-      
+
       return signature;
     });
   } catch (error: any) {
