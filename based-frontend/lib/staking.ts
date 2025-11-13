@@ -5,7 +5,7 @@ import { handleError, getUserFriendlyError } from './errorHandler';
 import { rateLimiter } from './rateLimiter';
 
 const STAKE_PROGRAM_ID = new PublicKey('Stake11111111111111111111111111111111111111');
-const VALIDATOR_VOTE = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA'); // Active devnet validator
+const VALIDATOR_VOTE = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
 const STAKE_CONFIG = new PublicKey('StakeConfig11111111111111111111111111111111');
 const STAKE_HISTORY = new PublicKey('SysvarStakeHistory1111111111111111111111111');
 
@@ -23,6 +23,11 @@ export async function depositSOL(
     return await retryWithFailover(async () => {
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
       const program = await getProgram(anchorWallet);
+      
+      const [state] = PublicKey.findProgramAddressSync(
+        [Buffer.from('state')],
+        program.programId
+      );
       
       const [vault] = PublicKey.findProgramAddressSync(
         [Buffer.from('vault')],
@@ -42,10 +47,11 @@ export async function depositSOL(
       const signature = await program.methods
         .createStakeAccount(amount, VALIDATOR_VOTE)
         .accounts({
+          state: state,
+          userStake: userStake,
           user: walletPublicKey,
-          vault,
-          userStake,
-          stakeAccount,
+          vault: vault,
+          stakeAccount: stakeAccount,
           voteAccount: VALIDATOR_VOTE,
           systemProgram: SystemProgram.programId,
           stakeProgram: STAKE_PROGRAM_ID,
@@ -68,10 +74,7 @@ export async function depositSOL(
   }
 }
 
-export async function getUserStake(
-  walletPublicKey: PublicKey,
-  wallet: any
-) {
+export async function getUserStake(walletPublicKey: PublicKey, wallet: any) {
   try {
     return await retryWithFailover(async () => {
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
@@ -85,14 +88,11 @@ export async function getUserStake(
       return await program.account.userStake.fetch(userStake);
     });
   } catch (error: any) {
-    return null; // User hasn't staked yet
+    return null;
   }
 }
 
-export async function getStakeInfo(
-  walletPublicKey: PublicKey,
-  wallet: any
-) {
+export async function getStakeInfo(walletPublicKey: PublicKey, wallet: any) {
   const stakeData = await getUserStake(walletPublicKey, wallet);
   
   return {
@@ -103,4 +103,4 @@ export async function getStakeInfo(
   };
 }
 
-export const CURRENT_APY = 7.0; // 7% APY from validator staking
+export const CURRENT_APY = 7.0;
