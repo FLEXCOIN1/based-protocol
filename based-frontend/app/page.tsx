@@ -26,11 +26,13 @@ export default function Home() {
 
   const handleStake = async () => {
     setLoading(true);
-    setMessage('');
+    setMessage('⏳ Staking in progress...');
     try {
       const tx = await stakeSOL(wallet, parseFloat(stakeAmount), connection);
+      setMessage('⏳ Transaction confirmed, updating balance...');
+      await loadStakeInfo(); // Auto-refresh balance
       setMessage(`✓ Successfully staked ${stakeAmount} SOL`);
-      await loadStakeInfo();
+      setTimeout(() => setMessage(''), 5000);
     } catch (error: any) {
       setMessage(`✗ ${error.message}`);
     } finally {
@@ -40,11 +42,13 @@ export default function Home() {
 
   const handleUnstake = async () => {
     setLoading(true);
-    setMessage('');
+    setMessage('⏳ Unstaking in progress...');
     try {
       const tx = await unstakeSOL(wallet, parseFloat(stakeAmount), connection);
+      setMessage('⏳ Transaction confirmed, updating balance...');
+      await loadStakeInfo(); // Auto-refresh balance
       setMessage(`✓ Successfully unstaked ${stakeAmount} SOL`);
-      await loadStakeInfo();
+      setTimeout(() => setMessage(''), 5000);
     } catch (error: any) {
       setMessage(`✗ ${error.message}`);
     } finally {
@@ -119,7 +123,7 @@ export default function Home() {
               </div>
 
               {message && (
-                <div className={`mt-6 p-4 rounded-xl border-2 ${message.includes('✓') ? 'bg-green-50 border-green-300 text-green-800' : 'bg-red-50 border-red-300 text-red-800'}`}>
+                <div className={`mt-6 p-4 rounded-xl border-2 ${message.includes('✓') ? 'bg-green-50 border-green-300 text-green-800' : message.includes('⏳') ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-red-50 border-red-300 text-red-800'}`}>
                   {message}
                 </div>
               )}

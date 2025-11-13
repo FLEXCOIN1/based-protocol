@@ -25,11 +25,13 @@ export default function Stats() {
     
     if (stateAccount) {
       const data = stateAccount.data;
-      // Correct offsets: discriminator(8) + total_staked(8) + total_rewards(8) + total_users(8)
       const totalStaked = Number(data.readBigUInt64LE(8)) / 1e9;
-      const totalUsers = Number(data.readBigUInt64LE(24)); // Fixed offset!
+      // Fix: Read as regular number, not BigInt
+      const totalUsersBuffer = data.slice(24, 32);
+      const totalUsers = totalUsersBuffer.readUInt32LE(0); // Read as 32-bit int
       const vaultBalance = vaultAccount ? vaultAccount.lamports / 1e9 : 0;
       
+      console.log('Stats:', { totalStaked, totalUsers, vaultBalance });
       setStats({ totalStaked, totalUsers, vaultBalance });
     }
     setLoading(false);
