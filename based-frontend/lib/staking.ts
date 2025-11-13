@@ -17,16 +17,7 @@ function encodeU64(value: number): Uint8Array {
   return arr;
 }
 
-async function getBlockhashWithTimeout(connection: Connection, timeoutMs = 5000): Promise<string> {
-  return Promise.race([
-    connection.getLatestBlockhash('finalized').then(r => r.blockhash),
-    new Promise<string>((_, reject) => 
-      setTimeout(() => reject(new Error('Blockhash timeout')), timeoutMs)
-    )
-  ]);
-}
-
-export async function stakeSOL(wallet: any, amount: number, _connection: Connection): Promise<string> {
+export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
   if (!wallet.publicKey || !wallet.connected) {
     throw new Error("Wallet not connected");
   }
@@ -34,13 +25,26 @@ export async function stakeSOL(wallet: any, amount: number, _connection: Connect
   console.log("=== STAKING", amount, "SOL ===");
 
   try {
-    // Find PDAs
+    const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+
+    // Check if protocol is initialized
     const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
+    
+    console.log("Checking protocol state:", state.toString());
+    const stateAccount = await freshConnection.getAccountInfo(state);
+    
+    if (!stateAccount) {
+      throw new Error("❌ PROTOCOL NOT INITIALIZED!\n\nThe admin needs to run the 'initialize' instruction first.\n\nState PDA: " + state.toString());
+    }
+    
+    console.log("✅ Protocol state exists");
+
+    // Find other PDAs
     const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
     const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
     const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
 
-    console.log("✅ PDAs calculated");
+    console.log("✅ All PDAs calculated");
 
     // Build instruction data
     const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
@@ -53,7 +57,6 @@ export async function stakeSOL(wallet: any, amount: number, _connection: Connect
     data.set(amountBytes, discriminator.length);
     data.set(validatorBytes, discriminator.length + amountBytes.length);
 
-    // Build instruction
     const instruction = new TransactionInstruction({
       keys: [
         { pubkey: state, isSigner: false, isWritable: true },
@@ -72,33 +75,25 @@ export async function stakeSOL(wallet: any, amount: number, _connection: Connect
       data: Buffer.from(data),
     });
 
-    console.log("✅ Instruction built");
-
-    // Build transaction
     const transaction = new Transaction().add(instruction);
     transaction.feePayer = wallet.publicKey;
-
-    console.log("Fetching blockhash...");
     
-    // Use fresh connection with timeout
-    const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-    const blockhash = await getBlockhashWithTimeout(freshConnection, 5000);
-    
+    const { blockhash } = await freshConnection.getLatestBlockhash('finalized');
     transaction.recentBlockhash = blockhash;
 
-    console.log("✅ Transaction complete, sending to wallet...");
+    console.log("✅ Transaction ready, sending to Phantom...");
     
     const signature = await wallet.sendTransaction(transaction, freshConnection);
     
-    console.log("✅ SENT:", signature);
-    console.log("https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
+    console.log("✅ TX SENT:", signature);
+    console.log("🔗 https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
     
     await freshConnection.confirmTransaction(signature, 'confirmed');
-    console.log("✅ CONFIRMED!");
+    console.log("✅ STAKE COMPLETE!");
     
     return signature;
   } catch (error: any) {
-    console.error("❌ Staking failed:", error.message || error);
+    console.error("❌ Error:", error.message || error);
     throw error;
   }
 }
