@@ -20,31 +20,60 @@ export function handleError(error: Error, context?: ErrorContext) {
 
 export function getUserFriendlyError(error: any): string {
   const errorMsg = error?.message || error?.toString() || 'Unknown error';
-  
-  // Insufficient SOL for gas
-  if (errorMsg.includes('insufficient funds') || errorMsg.includes('0x1')) {
-    return 'Insufficient SOL for transaction fees. Add at least 0.01 SOL to your wallet.';
+
+  // Wallet connection errors
+  if (errorMsg.includes('not connected') || errorMsg.includes('wallet not found')) {
+    return 'Please connect your wallet first.';
   }
-  
+
+  // Insufficient SOL for gas
+  if (errorMsg.includes('insufficient funds') || errorMsg.includes('0x1') || errorMsg.includes('insufficient lamports')) {
+    return 'Insufficient SOL for transaction. Add at least 0.1 SOL to your wallet.';
+  }
+
   // User rejected
-  if (errorMsg.includes('User rejected')) {
+  if (errorMsg.includes('User rejected') || errorMsg.includes('user rejected')) {
     return 'Transaction cancelled by user.';
   }
-  
+
+  // Account errors
+  if (errorMsg.includes('Account does not exist') || errorMsg.includes('AccountNotInitialized')) {
+    return 'Staking pool not initialized. Please contact support.';
+  }
+
+  // Program errors
+  if (errorMsg.includes('InsufficientFunds')) {
+    return 'Insufficient staked balance to withdraw.';
+  }
+
+  if (errorMsg.includes('Unauthorized')) {
+    return 'Unauthorized access. Make sure you own this account.';
+  }
+
   // RPC timeout
-  if (errorMsg.includes('timeout') || errorMsg.includes('429')) {
+  if (errorMsg.includes('timeout') || errorMsg.includes('429') || errorMsg.includes('rate limit')) {
     return 'Network congestion. Please try again in a moment.';
   }
-  
+
   // Slippage
   if (errorMsg.includes('slippage')) {
     return 'Price changed too much. Please try again.';
   }
-  
+
+  // Simulation errors
+  if (errorMsg.includes('simulation failed')) {
+    return 'Transaction simulation failed. Please check your balance and try again.';
+  }
+
   // Generic blockchain error
   if (errorMsg.includes('0x')) {
     return 'Transaction failed. Please check your wallet and try again.';
   }
-  
+
+  // Rate limiting
+  if (errorMsg.includes('Rate limit exceeded')) {
+    return errorMsg; // Already user-friendly
+  }
+
   return errorMsg;
 }
