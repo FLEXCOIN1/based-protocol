@@ -25,6 +25,9 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
   try {
     console.log("=== STAKING", amount, "SOL ===");
 
+    // Use a fresh connection with a known-good RPC
+    const freshConnection = new Connection('https://api.devnet.solana.com', 'confirmed');
+
     // Find PDAs
     const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
     const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
@@ -33,13 +36,12 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
 
     console.log("PDAs calculated");
 
-    // Build instruction data - BROWSER COMPATIBLE
+    // Build instruction data
     const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
     const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
     const amountBytes = encodeU64(amountLamports);
     const validatorBytes = DEFAULT_VALIDATOR.toBytes();
     
-    // Combine all data
     const data = new Uint8Array(discriminator.length + amountBytes.length + validatorBytes.length);
     data.set(discriminator, 0);
     data.set(amountBytes, discriminator.length);
@@ -69,29 +71,40 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
     // Build transaction
     const transaction = new Transaction().add(instruction);
     transaction.feePayer = wallet.publicKey;
-    const { blockhash } = await connection.getLatestBlockhash('finalized');
+
+    // Get blockhash with retry logic
+    let blockhash;
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        console.log(`Fetching blockhash (attempt ${attempts + 1})...`);
+        const result = await freshConnection.getLatestBlockhash('finalized');
+        blockhash = result.blockhash;
+        console.log("Got blockhash:", blockhash);
+        break;
+      } catch (e) {
+        console.error("Blockhash fetch failed:", e);
+        attempts++;
+        if (attempts === 3) throw new Error("Failed to get blockhash after 3 attempts");
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
     transaction.recentBlockhash = blockhash;
 
-    console.log("Sending to wallet for signature...");
+    console.log("Requesting signature from wallet...");
 
-    // Sign and send
-    const signed = await wallet.signTransaction(transaction);
-    const signature = await connection.sendRawTransaction(signed.serialize(), {
-      skipPreflight: false,
-      preflightCommitment: 'confirmed'
-    });
+    // Let wallet sign and send (Phantom handles everything)
+    const { signature } = await wallet.signAndSendTransaction(transaction);
 
     console.log("✅ TX SENT:", signature);
     console.log("Explorer: https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
 
-    await connection.confirmTransaction(signature, 'confirmed');
-    console.log("✅ CONFIRMED!");
-    
     return signature;
 
   } catch (error: any) {
     console.error("❌ ERROR:", error);
-    throw error;
+    throw new Error(error.message || "Failed to stake");
   }
 }
 
