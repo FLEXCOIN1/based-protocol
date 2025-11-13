@@ -27,14 +27,13 @@ export async function depositSOL(
       // Convert SOL to lamports
       const amountLamports = Math.floor(amount * 1_000_000_000);
 
-      // Validator vote account (devnet validator)
-      const validatorVote = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
-
       // Call create_stake_account - Anchor will auto-derive PDAs from the IDL
       const signature = await program.methods
-        .createStakeAccount(amountLamports, validatorVote)
+        .createStakeAccount(amountLamports, VALIDATOR_VOTE)
         .accounts({
           user: walletPublicKey,
+          voteAccount: VALIDATOR_VOTE,
+          stakeConfig: STAKE_CONFIG,
         })
         .rpc();
 
