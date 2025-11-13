@@ -50,8 +50,26 @@ pub mod based_protocol {
     pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
         require!(ctx.accounts.user_stake.amount >= amount, ErrorCode::InsufficientStake);
         
-        **ctx.accounts.vault.to_account_info().try_borrow_mut_lamports()? -= amount;
-        **ctx.accounts.user.to_account_info().try_borrow_mut_lamports()? += amount;
+        // Transfer from vault (PDA) back to user using invoke_signed
+        let vault_bump = ctx.bumps.vault;
+        let vault_seeds = &[b"vault".as_ref(), &[vault_bump]];
+        let signer_seeds = &[&vault_seeds[..]];
+        
+        let transfer_ix = system_instruction::transfer(
+            ctx.accounts.vault.key,
+            ctx.accounts.user.key,
+            amount,
+        );
+
+        anchor_lang::solana_program::program::invoke_signed(
+            &transfer_ix,
+            &[
+                ctx.accounts.vault.to_account_info(),
+                ctx.accounts.user.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            signer_seeds,
+        )?;
         
         ctx.accounts.user_stake.amount -= amount;
         ctx.accounts.state.total_staked -= amount;
