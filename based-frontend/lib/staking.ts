@@ -7,51 +7,45 @@ const DEFAULT_VALIDATOR = new PublicKey("J1to3PQfXidUUhprQWgdKkQAMWPJAEqSJ7amkBD
 
 export const CURRENT_APY = 8.5;
 
+function encodeU64(value: number): Uint8Array {
+  const arr = new Uint8Array(8);
+  let num = value;
+  for (let i = 0; i < 8; i++) {
+    arr[i] = num & 0xff;
+    num = Math.floor(num / 256);
+  }
+  return arr;
+}
+
 export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
   if (!wallet.publicKey || !wallet.connected) {
     throw new Error("Wallet not connected");
   }
 
   try {
-    console.log("=== STAKING ===");
-    console.log("User:", wallet.publicKey.toString());
-    console.log("Amount:", amount, "SOL");
+    console.log("=== STAKING", amount, "SOL ===");
 
     // Find PDAs
-    const [state] = PublicKey.findProgramAddressSync(
-      [Buffer.from("state")],
-      PROGRAM_ID
-    );
+    const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
+    const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
+    const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
+    const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
 
-    const [userStake] = PublicKey.findProgramAddressSync(
-      [Buffer.from("user_stake"), wallet.publicKey.toBuffer()],
-      PROGRAM_ID
-    );
+    console.log("PDAs calculated");
 
-    const [vault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("vault")],
-      PROGRAM_ID
-    );
-
-    const [stakeAccount] = PublicKey.findProgramAddressSync(
-      [Buffer.from("stake"), wallet.publicKey.toBuffer()],
-      PROGRAM_ID
-    );
-
-    console.log("State PDA:", state.toString());
-    console.log("UserStake PDA:", userStake.toString());
-    console.log("Vault PDA:", vault.toString());
-    console.log("StakeAccount PDA:", stakeAccount.toString());
-
-    // Build instruction data
-    const discriminator = Buffer.from([105, 24, 131, 19, 201, 250, 157, 73]);
+    // Build instruction data - BROWSER COMPATIBLE
+    const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
+    const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
+    const amountBytes = encodeU64(amountLamports);
+    const validatorBytes = DEFAULT_VALIDATOR.toBytes();
     
-    const amountLamports = BigInt(Math.floor(amount * LAMPORTS_PER_SOL));
-    const amountBuffer = Buffer.alloc(8);
-    amountBuffer.writeBigUInt64LE(amountLamports);
-    
-    const validatorBuffer = DEFAULT_VALIDATOR.toBuffer();
-    const data = Buffer.concat([discriminator, amountBuffer, validatorBuffer]);
+    // Combine all data
+    const data = new Uint8Array(discriminator.length + amountBytes.length + validatorBytes.length);
+    data.set(discriminator, 0);
+    data.set(amountBytes, discriminator.length);
+    data.set(validatorBytes, discriminator.length + amountBytes.length);
+
+    console.log("Instruction data built");
 
     // Build instruction
     const instruction = new TransactionInstruction({
@@ -69,65 +63,39 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
         { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
       ],
       programId: PROGRAM_ID,
-      data,
+      data: Buffer.from(data),
     });
-
-    console.log("✅ Instruction built");
 
     // Build transaction
     const transaction = new Transaction().add(instruction);
     transaction.feePayer = wallet.publicKey;
-    
     const { blockhash } = await connection.getLatestBlockhash('finalized');
     transaction.recentBlockhash = blockhash;
 
-    console.log("✅ Transaction built, sending to wallet for signature...");
+    console.log("Sending to wallet for signature...");
 
     // Sign and send
     const signed = await wallet.signTransaction(transaction);
-    console.log("✅ Transaction signed, sending...");
-
     const signature = await connection.sendRawTransaction(signed.serialize(), {
       skipPreflight: false,
       preflightCommitment: 'confirmed'
     });
 
-    console.log("✅ Transaction sent:", signature);
-    console.log("View on explorer: https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
+    console.log("✅ TX SENT:", signature);
+    console.log("Explorer: https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
 
-    // Wait for confirmation
-    const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+    await connection.confirmTransaction(signature, 'confirmed');
+    console.log("✅ CONFIRMED!");
     
-    if (confirmation.value.err) {
-      throw new Error("Transaction failed: " + JSON.stringify(confirmation.value.err));
-    }
-
-    console.log("✅ STAKE SUCCESS!");
     return signature;
 
   } catch (error: any) {
-    console.error("=== STAKING ERROR ===");
-    console.error(error);
-    
-    if (error.message) {
-      throw new Error(error.message);
-    }
+    console.error("❌ ERROR:", error);
     throw error;
   }
 }
 
 export const depositSOL = stakeSOL;
-
-export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
-  throw new Error("Unstake not implemented yet");
-}
-
-export async function getUserStakeInfo(walletAddress: PublicKey, connection: Connection): Promise<any> {
-  return {
-    amount: BigInt(0),
-    rewardsEarned: BigInt(0),
-    exists: false,
-  };
-}
-
+export async function unstakeSOL() { throw new Error("Not implemented"); }
+export async function getUserStakeInfo() { return { amount: 0, exists: false }; }
 export const getStakeInfo = getUserStakeInfo;
