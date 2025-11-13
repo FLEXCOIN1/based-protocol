@@ -17,6 +17,15 @@ export async function depositSOL(
   const rateCheck = rateLimiter.check(walletPublicKey.toBase58());
   if (!rateCheck.allowed) {
     throw new Error(`Rate limit exceeded. Try again in ${rateCheck.resetIn} seconds.`);
+// Export the APY constant that page.tsx expects
+export const CURRENT_APY = 8.5;
+
+async function accountExists(connection: Connection, address: PublicKey): Promise<boolean> {
+  try {
+    const accountInfo = await connection.getAccountInfo(address);
+    return accountInfo !== null;
+  } catch (error) {
+    return false;
   }
 
   try {
@@ -75,6 +84,17 @@ export async function depositSOL(
 }
 
 export async function getUserStake(walletPublicKey: PublicKey, wallet: any) {
+// Alias for page.tsx compatibility
+export const depositSOL = stakeSOL;
+
+export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
+  if (!wallet.publicKey) throw new Error("Wallet not connected");
+  const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
+  const program = new Program(idl as any, PROGRAM_ID, provider);
+  const [userStakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("user-stake"), wallet.publicKey.toBuffer()], program.programId);
+  const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], program.programId);
+  const userAccountExists = await accountExists(connection, userStakeAccount);
+  if (!userAccountExists) throw new Error("No stake account found. You must stake first.");
   try {
     return await retryWithFailover(async () => {
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
@@ -104,3 +124,5 @@ export async function getStakeInfo(walletPublicKey: PublicKey, wallet: any) {
 }
 
 export const CURRENT_APY = 7.0;
+// Alias for page.tsx compatibility
+export const getStakeInfo = getUserStakeInfo;
