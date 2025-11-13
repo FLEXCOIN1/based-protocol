@@ -1,13 +1,8 @@
-import { PublicKey, SystemProgram, SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { getProgram, retryWithFailover } from './contract';
 import { AnchorWallet } from './anchorWallet';
 import { handleError, getUserFriendlyError } from './errorHandler';
 import { rateLimiter } from './rateLimiter';
-
-const STAKE_PROGRAM_ID = new PublicKey('Stake11111111111111111111111111111111111111');
-const VALIDATOR_VOTE = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
-const STAKE_CONFIG = new PublicKey('StakeConfig11111111111111111111111111111111');
-const STAKE_HISTORY = new PublicKey('SysvarStakeHistory1111111111111111111111111');
 
 export async function depositSOL(
   walletPublicKey: PublicKey,
@@ -24,8 +19,29 @@ export async function depositSOL(
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
       const program = await getProgram(anchorWallet);
 
+      // Derive the user stake PDA
+      const [userStakePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
+        program.programId
+      );
+
+      // Check if user stake account exists
+      const connection = program.provider.connection;
+      const accountInfo = await connection.getAccountInfo(userStakePda);
+
+      // If account doesn't exist, we need to initialize it
+      // The deposit instruction should handle this with init_if_needed
+      // but we log it for debugging
+      if (!accountInfo) {
+        console.log('Creating new UserStake account for first-time staker...');
+      }
+
+      // Convert SOL to lamports
+      const amountLamports = Math.floor(amount * 1_000_000_000);
+
+      // Call deposit - it should create the account if it doesn't exist
       const signature = await program.methods
-        .createStakeAccount(amount, VALIDATOR_VOTE)
+        .deposit(amountLamports, null) // amount in lamports, no referrer
         .accounts({
           voteAccount: VALIDATOR_VOTE,
           systemProgram: SystemProgram.programId,
@@ -37,6 +53,11 @@ export async function depositSOL(
         })
         .rpc();
 
+          user: walletPublicKey,
+        })
+        .rpc();
+
+      console.log('✅ Stake successful! Transaction:', signature);
       return signature;
     });
   } catch (error: any) {
@@ -51,31 +72,66 @@ export async function depositSOL(
 
 export async function getUserStake(walletPublicKey: PublicKey, wallet: any) {
   try {
-    return await retryWithFailover(async () => {
-      const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
-      const program = await getProgram(anchorWallet);
-      
-      const [userStake] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
-        program.programId
-      );
-      
+    const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
+    const program = await getProgram(anchorWallet);
+
+    // Let Anchor auto-derive the PDA
+    const [userStake] = PublicKey.findProgramAddressSync(
+      [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
+      program.programId
+    );
+
+    // Try to fetch the account - don't retry if it doesn't exist
+    try {
       return await program.account.userStake.fetch(userStake);
-    });
+    } catch (fetchError: any) {
+      // Check if account doesn't exist (expected for new users)
+      const errorMsg = fetchError?.message || fetchError?.toString() || '';
+      if (errorMsg.includes('Account does not exist') ||
+          errorMsg.includes('AccountNotInitialized') ||
+          errorMsg.includes('Invalid account discriminator')) {
+        // Account doesn't exist yet - user hasn't staked
+        return null;
+      }
+      // For other errors (network issues), throw to trigger retry
+      throw fetchError;
+    }
   } catch (error: any) {
+    // Network errors or other issues - return null gracefully
+    console.log('Could not fetch user stake:', error.message);
     return null;
   }
 }
 
 export async function getStakeInfo(walletPublicKey: PublicKey, wallet: any) {
-  const stakeData = await getUserStake(walletPublicKey, wallet);
-  
-  return {
-    amount: stakeData?.amount?.toNumber() || 0,
-    rewardsEarned: stakeData?.rewardsEarned?.toNumber() || 0,
-    lastStakeTime: stakeData?.lastStakeTime?.toNumber() || 0,
-    stakeAccount: stakeData?.stakeAccount?.toString() || '',
-  };
+  try {
+    const stakeData = await getUserStake(walletPublicKey, wallet);
+
+    if (!stakeData) {
+      return {
+        amount: 0,
+        rewardsEarned: 0,
+        lastStakeTime: 0,
+        stakeAccount: '',
+      };
+    }
+
+    // Convert BN to number, handling lamports (1 SOL = 1B lamports)
+    return {
+      amount: stakeData.amount?.toNumber() / 1_000_000_000 || 0,
+      rewardsEarned: stakeData.totalRewardsEarned?.toNumber() / 1_000_000_000 || 0,
+      lastStakeTime: stakeData.lastStakeTime?.toNumber() || 0,
+      stakeAccount: walletPublicKey.toString(),
+    };
+  } catch (error: any) {
+    console.error('Error fetching stake info:', error);
+    return {
+      amount: 0,
+      rewardsEarned: 0,
+      lastStakeTime: 0,
+      stakeAccount: '',
+    };
+  }
 }
 
 export const CURRENT_APY = 7.0;
