@@ -38,7 +38,16 @@ export function getUserFriendlyError(error: any): string {
 
   // Account errors
   if (errorMsg.includes('Account does not exist') || errorMsg.includes('AccountNotInitialized')) {
+    // Check if it's a user account (expected) or pool account (unexpected)
+    if (errorMsg.toLowerCase().includes('user') || errorMsg.toLowerCase().includes('stake account')) {
+      return 'No staking history found. Start by staking SOL to earn rewards!';
+    }
     return 'Staking pool not initialized. Please contact support.';
+  }
+
+  // Invalid account discriminator (account doesn't exist)
+  if (errorMsg.includes('Invalid account discriminator')) {
+    return 'No staking history found. Stake SOL to get started!';
   }
 
   // Program errors

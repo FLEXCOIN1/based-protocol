@@ -44,21 +44,33 @@ export async function depositSOL(
 
 export async function getUserStake(walletPublicKey: PublicKey, wallet: any) {
   try {
-    return await retryWithFailover(async () => {
-      const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
-      const program = await getProgram(anchorWallet);
+    const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
+    const program = await getProgram(anchorWallet);
 
-      // Let Anchor auto-derive the PDA
-      const [userStake] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
-        program.programId
-      );
+    // Let Anchor auto-derive the PDA
+    const [userStake] = PublicKey.findProgramAddressSync(
+      [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
+      program.programId
+    );
 
+    // Try to fetch the account - don't retry if it doesn't exist
+    try {
       return await program.account.userStake.fetch(userStake);
-    });
+    } catch (fetchError: any) {
+      // Check if account doesn't exist (expected for new users)
+      const errorMsg = fetchError?.message || fetchError?.toString() || '';
+      if (errorMsg.includes('Account does not exist') ||
+          errorMsg.includes('AccountNotInitialized') ||
+          errorMsg.includes('Invalid account discriminator')) {
+        // Account doesn't exist yet - user hasn't staked
+        return null;
+      }
+      // For other errors (network issues), throw to trigger retry
+      throw fetchError;
+    }
   } catch (error: any) {
-    // Account might not exist yet if user hasn't staked
-    console.log('User stake account not found:', error.message);
+    // Network errors or other issues - return null gracefully
+    console.log('Could not fetch user stake:', error.message);
     return null;
   }
 }
