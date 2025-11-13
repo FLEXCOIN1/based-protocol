@@ -21,7 +21,6 @@ pub mod based_protocol {
         amount: u64,
         _validator: Pubkey,
     ) -> Result<()> {
-        // Transfer to vault
         let transfer_ix = system_instruction::transfer(
             ctx.accounts.user.key,
             ctx.accounts.vault.key,
@@ -36,17 +35,27 @@ pub mod based_protocol {
             ],
         )?;
 
-        // Update user stake
         ctx.accounts.user_stake.owner = ctx.accounts.user.key();
         ctx.accounts.user_stake.amount = amount;
         ctx.accounts.user_stake.stake_account = ctx.accounts.stake_account.key();
         ctx.accounts.user_stake.rewards_earned = 0;
         ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
 
-        // Update protocol state
         ctx.accounts.state.total_staked += amount;
         ctx.accounts.state.total_users += 1;
 
+        Ok(())
+    }
+
+    pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
+        require!(ctx.accounts.user_stake.amount >= amount, ErrorCode::InsufficientStake);
+        
+        **ctx.accounts.vault.to_account_info().try_borrow_mut_lamports()? -= amount;
+        **ctx.accounts.user.to_account_info().try_borrow_mut_lamports()? += amount;
+        
+        ctx.accounts.user_stake.amount -= amount;
+        ctx.accounts.state.total_staked -= amount;
+        
         Ok(())
     }
 }
@@ -87,6 +96,20 @@ pub struct CreateStakeAccount<'info> {
     pub stake_config: UncheckedAccount<'info>,
 }
 
+#[derive(Accounts)]
+pub struct Unstake<'info> {
+    #[account(mut, seeds = [b"state"], bump)]
+    pub state: Account<'info, ProtocolState>,
+    #[account(mut, seeds = [b"user_stake", user.key().as_ref()], bump)]
+    pub user_stake: Account<'info, UserStake>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    /// CHECK: vault PDA
+    #[account(mut, seeds = [b"vault"], bump)]
+    pub vault: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct ProtocolState {
     pub total_staked: u64,
@@ -103,4 +126,10 @@ pub struct UserStake {
     pub stake_account: Pubkey,
     pub rewards_earned: u64,
     pub last_stake_time: i64,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Insufficient stake amount")]
+    InsufficientStake,
 }
