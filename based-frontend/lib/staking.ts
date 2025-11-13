@@ -1,8 +1,13 @@
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, SystemProgram, SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getProgram, retryWithFailover } from './contract';
 import { AnchorWallet } from './anchorWallet';
 import { handleError, getUserFriendlyError } from './errorHandler';
 import { rateLimiter } from './rateLimiter';
+
+const STAKE_PROGRAM_ID = new PublicKey('Stake11111111111111111111111111111111111111');
+const VALIDATOR_VOTE = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
+const STAKE_CONFIG = new PublicKey('StakeConfig11111111111111111111111111111111');
+const STAKE_HISTORY = new PublicKey('SysvarStakeHistory1111111111111111111111111');
 
 export async function depositSOL(
   walletPublicKey: PublicKey,
@@ -29,16 +34,6 @@ export async function depositSOL(
       const signature = await program.methods
         .createStakeAccount(amountLamports, validatorVote)
         .accounts({
-          voteAccount: VALIDATOR_VOTE,
-          systemProgram: SystemProgram.programId,
-          stakeProgram: STAKE_PROGRAM_ID,
-          rent: SYSVAR_RENT_PUBKEY,
-          clock: SYSVAR_CLOCK_PUBKEY,
-          stakeHistory: STAKE_HISTORY,
-          stakeConfig: STAKE_CONFIG,
-        })
-        .rpc();
-
           user: walletPublicKey,
         })
         .rpc();
