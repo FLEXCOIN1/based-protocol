@@ -17,79 +17,90 @@ function encodeU64(value: number): Uint8Array {
   return arr;
 }
 
-export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
+async function getBlockhashWithTimeout(connection: Connection, timeoutMs = 5000): Promise<string> {
+  return Promise.race([
+    connection.getLatestBlockhash('finalized').then(r => r.blockhash),
+    new Promise<string>((_, reject) => 
+      setTimeout(() => reject(new Error('Blockhash timeout')), timeoutMs)
+    )
+  ]);
+}
+
+export async function stakeSOL(wallet: any, amount: number, _connection: Connection): Promise<string> {
   if (!wallet.publicKey || !wallet.connected) {
     throw new Error("Wallet not connected");
   }
 
   console.log("=== STAKING", amount, "SOL ===");
 
-  // Find PDAs
-  const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
-  const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
-  const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
-  const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
+  try {
+    // Find PDAs
+    const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
+    const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
+    const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
+    const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
 
-  console.log("PDAs calculated");
+    console.log("✅ PDAs calculated");
 
-  // Build instruction data
-  const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
-  const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
-  const amountBytes = encodeU64(amountLamports);
-  const validatorBytes = DEFAULT_VALIDATOR.toBytes();
-  
-  const data = new Uint8Array(discriminator.length + amountBytes.length + validatorBytes.length);
-  data.set(discriminator, 0);
-  data.set(amountBytes, discriminator.length);
-  data.set(validatorBytes, discriminator.length + amountBytes.length);
+    // Build instruction data
+    const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
+    const amountLamports = Math.floor(amount * LAMPORTS_PER_SOL);
+    const amountBytes = encodeU64(amountLamports);
+    const validatorBytes = DEFAULT_VALIDATOR.toBytes();
+    
+    const data = new Uint8Array(discriminator.length + amountBytes.length + validatorBytes.length);
+    data.set(discriminator, 0);
+    data.set(amountBytes, discriminator.length);
+    data.set(validatorBytes, discriminator.length + amountBytes.length);
 
-  // Build instruction
-  const instruction = new TransactionInstruction({
-    keys: [
-      { pubkey: state, isSigner: false, isWritable: true },
-      { pubkey: userStake, isSigner: false, isWritable: true },
-      { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
-      { pubkey: vault, isSigner: false, isWritable: true },
-      { pubkey: stakeAccount, isSigner: false, isWritable: true },
-      { pubkey: DEFAULT_VALIDATOR, isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-      { pubkey: STAKE_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
-      { pubkey: SYSVAR_STAKE_HISTORY_PUBKEY, isSigner: false, isWritable: false },
-      { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
-    ],
-    programId: PROGRAM_ID,
-    data: Buffer.from(data),
-  });
+    // Build instruction
+    const instruction = new TransactionInstruction({
+      keys: [
+        { pubkey: state, isSigner: false, isWritable: true },
+        { pubkey: userStake, isSigner: false, isWritable: true },
+        { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+        { pubkey: vault, isSigner: false, isWritable: true },
+        { pubkey: stakeAccount, isSigner: false, isWritable: true },
+        { pubkey: DEFAULT_VALIDATOR, isSigner: false, isWritable: false },
+        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        { pubkey: STAKE_PROGRAM_ID, isSigner: false, isWritable: false },
+        { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
+        { pubkey: SYSVAR_STAKE_HISTORY_PUBKEY, isSigner: false, isWritable: false },
+        { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
+      ],
+      programId: PROGRAM_ID,
+      data: Buffer.from(data),
+    });
 
-  console.log("Building transaction...");
+    console.log("✅ Instruction built");
 
-  // Build transaction with ALL required fields
-  const transaction = new Transaction().add(instruction);
-  
-  // CRITICAL: Add feePayer and recentBlockhash
-  transaction.feePayer = wallet.publicKey;
-  const { blockhash } = await connection.getLatestBlockhash('finalized');
-  transaction.recentBlockhash = blockhash;
+    // Build transaction
+    const transaction = new Transaction().add(instruction);
+    transaction.feePayer = wallet.publicKey;
 
-  console.log("Transaction built:", {
-    feePayer: transaction.feePayer.toString(),
-    blockhash: transaction.recentBlockhash,
-    hasInstruction: transaction.instructions.length > 0
-  });
-  
-  console.log("Sending to wallet...");
-  
-  const signature = await wallet.sendTransaction(transaction, connection);
-  
-  console.log("✅ TX SENT:", signature);
-  console.log("https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
-  
-  console.log("Waiting for confirmation...");
-  await connection.confirmTransaction(signature, 'confirmed');
-  console.log("✅ STAKE COMPLETE!");
-  
-  return signature;
+    console.log("Fetching blockhash...");
+    
+    // Use fresh connection with timeout
+    const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+    const blockhash = await getBlockhashWithTimeout(freshConnection, 5000);
+    
+    transaction.recentBlockhash = blockhash;
+
+    console.log("✅ Transaction complete, sending to wallet...");
+    
+    const signature = await wallet.sendTransaction(transaction, freshConnection);
+    
+    console.log("✅ SENT:", signature);
+    console.log("https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
+    
+    await freshConnection.confirmTransaction(signature, 'confirmed');
+    console.log("✅ CONFIRMED!");
+    
+    return signature;
+  } catch (error: any) {
+    console.error("❌ Staking failed:", error.message || error);
+    throw error;
+  }
 }
 
 export const depositSOL = stakeSOL;
