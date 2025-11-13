@@ -3,7 +3,7 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import WalletButton from '../components/WalletButton';
 import { useState, useEffect } from 'react';
-import { depositSOL, getStakeInfo, CURRENT_APY } from '../lib/staking';
+import { stakeSOL, unstakeSOL, getUserStakeInfo, CURRENT_APY } from '../lib/staking';
 import Link from 'next/link';
 
 export default function Home() {
@@ -13,6 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [userStake, setUserStake] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (wallet.publicKey) {
@@ -22,11 +23,14 @@ export default function Home() {
 
   const loadStakeInfo = async () => {
     if (!wallet.publicKey) return;
+    setRefreshing(true);
     try {
-      const info = await getStakeInfo(wallet.publicKey, connection);
+      const info = await getUserStakeInfo(wallet.publicKey, connection);
       setUserStake(info);
     } catch (error) {
       console.error('Error loading stake info:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -40,8 +44,8 @@ export default function Home() {
     setMessage('');
 
     try {
-      const tx = await depositSOL(wallet, parseFloat(stakeAmount), connection);
-      setMessage(`✅ Staked ${stakeAmount} SOL! TX: ${tx}`);
+      const tx = await stakeSOL(wallet, parseFloat(stakeAmount), connection);
+      setMessage(`✅ Staked ${stakeAmount} SOL! TX: ${tx.slice(0, 8)}...`);
       await loadStakeInfo();
     } catch (error: any) {
       setMessage(`❌ ${error.message || 'Failed to stake'}`);
@@ -49,6 +53,28 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const handleUnstake = async () => {
+    if (!wallet.connected || !wallet.publicKey) {
+      setMessage('❌ Wallet not connected');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const tx = await unstakeSOL(wallet, parseFloat(stakeAmount), connection);
+      setMessage(`✅ Unstaked ${stakeAmount} SOL! TX: ${tx.slice(0, 8)}...`);
+      await loadStakeInfo();
+    } catch (error: any) {
+      setMessage(`❌ ${error.message || 'Failed to unstake'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stakedSOL = userStake && userStake.exists ? (userStake.amount / 1e9).toFixed(4) : '0.0000';
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8">
@@ -64,29 +90,47 @@ export default function Home() {
 
           {wallet.connected ? (
             <>
+              {userStake && userStake.exists && (
+                <div className="mb-6 p-4 bg-gray-700 rounded">
+                  <p className="text-sm text-gray-300">Your Staked Balance</p>
+                  <p className="text-3xl font-bold text-green-400">{stakedSOL} SOL</p>
+                  <button 
+                    onClick={loadStakeInfo}
+                    disabled={refreshing}
+                    className="text-sm text-blue-400 hover:text-blue-300 mt-2"
+                  >
+                    {refreshing ? '↻ Refreshing...' : '↻ Refresh'}
+                  </button>
+                </div>
+              )}
+
               <input
                 type="number"
                 value={stakeAmount}
                 onChange={(e) => setStakeAmount(e.target.value)}
                 className="w-full bg-gray-700 rounded p-3 mb-4 text-white"
-                placeholder="Amount to stake"
+                placeholder="Amount (SOL)"
                 step="0.1"
                 min="0.1"
               />
-              <button
-                onClick={handleStake}
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded p-3 font-bold"
-              >
-                {loading ? 'Staking...' : `Stake ${stakeAmount} SOL`}
-              </button>
-
-              {userStake && userStake.exists && (
-                <div className="mt-6 p-4 bg-gray-700 rounded">
-                  <p className="text-sm text-gray-300">Your Staked Amount:</p>
-                  <p className="text-2xl font-bold">{(userStake.stakedAmount.toNumber() / 1e9).toFixed(4)} SOL</p>
-                </div>
-              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={handleStake}
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded p-3 font-bold"
+                >
+                  {loading ? '⏳' : '➕'} Stake
+                </button>
+                
+                <button
+                  onClick={handleUnstake}
+                  disabled={loading || !userStake?.exists}
+                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded p-3 font-bold"
+                >
+                  {loading ? '⏳' : '➖'} Unstake
+                </button>
+              </div>
             </>
           ) : (
             <p className="text-center text-gray-400">Connect your wallet to stake</p>
