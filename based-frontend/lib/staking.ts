@@ -1,5 +1,4 @@
 import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, SYSVAR_CLOCK_PUBKEY, SYSVAR_STAKE_HISTORY_PUBKEY } from "@solana/web3.js";
-import * as borsh from "@coral-xyz/borsh";
 
 const PROGRAM_ID = new PublicKey("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
 const STAKE_PROGRAM_ID = new PublicKey("Stake11111111111111111111111111111111111111");
@@ -8,128 +7,111 @@ const DEFAULT_VALIDATOR = new PublicKey("J1to3PQfXidUUhprQWgdKkQAMWPJAEqSJ7amkBD
 
 export const CURRENT_APY = 8.5;
 
-// Manual instruction builder - NO ANCHOR
-async function createStakeInstruction(
-  userPubkey: PublicKey,
-  amount: bigint
-): Promise<TransactionInstruction> {
-  
-  // Find PDAs manually
-  const [state] = PublicKey.findProgramAddressSync(
-    [Buffer.from("state")],
-    PROGRAM_ID
-  );
-
-  const [userStake] = PublicKey.findProgramAddressSync(
-    [Buffer.from("user_stake"), userPubkey.toBuffer()],
-    PROGRAM_ID
-  );
-
-  const [vault] = PublicKey.findProgramAddressSync(
-    [Buffer.from("vault")],
-    PROGRAM_ID
-  );
-
-  const [stakeAccount] = PublicKey.findProgramAddressSync(
-    [Buffer.from("stake"), userPubkey.toBuffer()],
-    PROGRAM_ID
-  );
-
-  // Create instruction data manually
-  // Discriminator for create_stake_account: [105, 24, 131, 19, 201, 250, 157, 73]
-  const discriminator = Buffer.from([105, 24, 131, 19, 201, 250, 157, 73]);
-  
-  // Encode amount (u64) and validator (pubkey)
-  const amountBuffer = Buffer.alloc(8);
-  amountBuffer.writeBigUInt64LE(amount);
-  
-  const validatorBuffer = DEFAULT_VALIDATOR.toBuffer();
-  
-  const data = Buffer.concat([discriminator, amountBuffer, validatorBuffer]);
-
-  // Build accounts array
-  const keys = [
-    { pubkey: state, isSigner: false, isWritable: true },
-    { pubkey: userStake, isSigner: false, isWritable: true },
-    { pubkey: userPubkey, isSigner: true, isWritable: true },
-    { pubkey: vault, isSigner: false, isWritable: true },
-    { pubkey: stakeAccount, isSigner: false, isWritable: true },
-    { pubkey: DEFAULT_VALIDATOR, isSigner: false, isWritable: false },
-    { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-    { pubkey: STAKE_PROGRAM_ID, isSigner: false, isWritable: false },
-    { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
-    { pubkey: SYSVAR_STAKE_HISTORY_PUBKEY, isSigner: false, isWritable: false },
-    { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
-  ];
-
-  return new TransactionInstruction({
-    keys,
-    programId: PROGRAM_ID,
-    data,
-  });
-}
-
 export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
   if (!wallet.publicKey || !wallet.connected) {
     throw new Error("Wallet not connected");
   }
 
   try {
-    console.log("=== MANUAL TRANSACTION BUILD ===");
+    console.log("=== STAKING ===");
     console.log("User:", wallet.publicKey.toString());
     console.log("Amount:", amount, "SOL");
 
-    // Check if protocol is initialized
+    // Find PDAs
     const [state] = PublicKey.findProgramAddressSync(
       [Buffer.from("state")],
       PROGRAM_ID
     );
 
-    const stateAccount = await connection.getAccountInfo(state);
-    if (!stateAccount) {
-      throw new Error("❌ Protocol not initialized. Contact admin to run 'initialize' first.");
-    }
-
-    console.log("✅ Protocol state exists");
-
-    // Check if user already has a stake
     const [userStake] = PublicKey.findProgramAddressSync(
       [Buffer.from("user_stake"), wallet.publicKey.toBuffer()],
       PROGRAM_ID
     );
 
-    const userStakeAccount = await connection.getAccountInfo(userStake);
-    if (userStakeAccount) {
-      throw new Error("❌ You already have an active stake. The contract doesn't support multiple stakes yet.");
-    }
+    const [vault] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault")],
+      PROGRAM_ID
+    );
 
-    console.log("✅ No existing stake found - proceeding");
+    const [stakeAccount] = PublicKey.findProgramAddressSync(
+      [Buffer.from("stake"), wallet.publicKey.toBuffer()],
+      PROGRAM_ID
+    );
 
-    // Build transaction manually
+    console.log("State PDA:", state.toString());
+    console.log("UserStake PDA:", userStake.toString());
+    console.log("Vault PDA:", vault.toString());
+    console.log("StakeAccount PDA:", stakeAccount.toString());
+
+    // Build instruction data
+    const discriminator = Buffer.from([105, 24, 131, 19, 201, 250, 157, 73]);
+    
     const amountLamports = BigInt(Math.floor(amount * LAMPORTS_PER_SOL));
-    const instruction = await createStakeInstruction(wallet.publicKey, amountLamports);
+    const amountBuffer = Buffer.alloc(8);
+    amountBuffer.writeBigUInt64LE(amountLamports);
+    
+    const validatorBuffer = DEFAULT_VALIDATOR.toBuffer();
+    const data = Buffer.concat([discriminator, amountBuffer, validatorBuffer]);
 
+    // Build instruction
+    const instruction = new TransactionInstruction({
+      keys: [
+        { pubkey: state, isSigner: false, isWritable: true },
+        { pubkey: userStake, isSigner: false, isWritable: true },
+        { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+        { pubkey: vault, isSigner: false, isWritable: true },
+        { pubkey: stakeAccount, isSigner: false, isWritable: true },
+        { pubkey: DEFAULT_VALIDATOR, isSigner: false, isWritable: false },
+        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        { pubkey: STAKE_PROGRAM_ID, isSigner: false, isWritable: false },
+        { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
+        { pubkey: SYSVAR_STAKE_HISTORY_PUBKEY, isSigner: false, isWritable: false },
+        { pubkey: STAKE_CONFIG_ID, isSigner: false, isWritable: false },
+      ],
+      programId: PROGRAM_ID,
+      data,
+    });
+
+    console.log("✅ Instruction built");
+
+    // Build transaction
     const transaction = new Transaction().add(instruction);
     transaction.feePayer = wallet.publicKey;
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    
+    const { blockhash } = await connection.getLatestBlockhash('finalized');
+    transaction.recentBlockhash = blockhash;
 
-    console.log("✅ Transaction built");
+    console.log("✅ Transaction built, sending to wallet for signature...");
 
     // Sign and send
     const signed = await wallet.signTransaction(transaction);
-    const signature = await connection.sendRawTransaction(signed.serialize());
+    console.log("✅ Transaction signed, sending...");
+
+    const signature = await connection.sendRawTransaction(signed.serialize(), {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed'
+    });
 
     console.log("✅ Transaction sent:", signature);
+    console.log("View on explorer: https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
 
     // Wait for confirmation
-    await connection.confirmTransaction(signature, "confirmed");
+    const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+    
+    if (confirmation.value.err) {
+      throw new Error("Transaction failed: " + JSON.stringify(confirmation.value.err));
+    }
 
-    console.log("✅ Transaction confirmed!");
+    console.log("✅ STAKE SUCCESS!");
     return signature;
 
   } catch (error: any) {
     console.error("=== STAKING ERROR ===");
     console.error(error);
+    
+    if (error.message) {
+      throw new Error(error.message);
+    }
     throw error;
   }
 }
@@ -137,39 +119,15 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
 export const depositSOL = stakeSOL;
 
 export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
-  throw new Error("Unstake not implemented in contract yet");
+  throw new Error("Unstake not implemented yet");
 }
 
 export async function getUserStakeInfo(walletAddress: PublicKey, connection: Connection): Promise<any> {
-  try {
-    const [userStake] = PublicKey.findProgramAddressSync(
-      [Buffer.from("user_stake"), walletAddress.toBuffer()],
-      PROGRAM_ID
-    );
-
-    const account = await connection.getAccountInfo(userStake);
-    
-    if (!account) {
-      return {
-        amount: BigInt(0),
-        rewardsEarned: BigInt(0),
-        exists: false,
-      };
-    }
-
-    // Manual deserialization (skip for now, just return exists)
-    return {
-      amount: BigInt(0),
-      rewardsEarned: BigInt(0),
-      exists: true,
-    };
-  } catch (error) {
-    return {
-      amount: BigInt(0),
-      rewardsEarned: BigInt(0),
-      exists: false,
-    };
-  }
+  return {
+    amount: BigInt(0),
+    rewardsEarned: BigInt(0),
+    exists: false,
+  };
 }
 
 export const getStakeInfo = getUserStakeInfo;
