@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
-use solana_program::{
-    stake::{self, instruction as stake_instruction},
-    system_instruction,
-    sysvar,
-};
+use anchor_lang::solana_program::system_instruction;
 
 declare_id!("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
+
+const STAKE_PROGRAM_ID: &str = "Stake11111111111111111111111111111111111111";
+const SYSVAR_CLOCK_ID: &str = "SysvarC1ock11111111111111111111111111111111";
+const SYSVAR_STAKE_HISTORY_ID: &str = "SysvarStakeHistory1111111111111111111111111";
 
 #[program]
 pub mod based_protocol {
@@ -23,7 +23,7 @@ pub mod based_protocol {
     pub fn create_stake_account(
         ctx: Context<CreateStakeAccount>,
         amount: u64,
-        validator: Pubkey,
+        _validator: Pubkey,
     ) -> Result<()> {
         // Transfer to vault
         let transfer_ix = system_instruction::transfer(
@@ -31,7 +31,7 @@ pub mod based_protocol {
             ctx.accounts.vault.key,
             amount,
         );
-        
+
         anchor_lang::solana_program::program::invoke(
             &transfer_ix,
             &[
@@ -40,74 +40,17 @@ pub mod based_protocol {
             ],
         )?;
 
-        // Store keys to extend lifetime
-        let user_key = ctx.accounts.user.key();
-        let stake_bump = ctx.bumps.stake_account;
-        let stake_seeds: &[&[u8]] = &[
-            b"stake",
-            user_key.as_ref(),
-            &[stake_bump],
-        ];
-
-        // Create stake account
-        let create_ix = stake_instruction::create_account(
-            ctx.accounts.vault.key,
-            ctx.accounts.stake_account.key,
-            &stake::state::Authorized {
-                staker: ctx.accounts.state.key(),
-                withdrawer: ctx.accounts.state.key(),
-            },
-            &stake::state::Lockup::default(),
-            amount,
-        );
-
-        for ix in create_ix.iter() {
-            anchor_lang::solana_program::program::invoke_signed(
-                ix,
-                &[
-                    ctx.accounts.vault.to_account_info(),
-                    ctx.accounts.stake_account.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                ],
-                &[stake_seeds],
-            )?;
-        }
-
-        // Delegate to validator
-        let state_key = ctx.accounts.state.key();
-        let state_bump = ctx.accounts.state.bump;
-        let state_seeds: &[&[u8]] = &[b"state", &[state_bump]];
-
-        let delegate_ix = stake_instruction::delegate_stake(
-            ctx.accounts.stake_account.key,
-            &state_key,
-            &validator,
-        );
-
-        anchor_lang::solana_program::program::invoke_signed(
-            &delegate_ix,
-            &[
-                ctx.accounts.stake_account.to_account_info(),
-                ctx.accounts.vote_account.to_account_info(),
-                ctx.accounts.clock.to_account_info(),
-                ctx.accounts.stake_history.to_account_info(),
-                ctx.accounts.stake_config.to_account_info(),
-                ctx.accounts.state.to_account_info(),
-            ],
-            &[state_seeds],
-        )?;
-
-        // Update state
-        if ctx.accounts.user_stake.amount == 0 {
-            ctx.accounts.state.total_users += 1;
-        }
-        ctx.accounts.user_stake.owner = user_key;
-        ctx.accounts.user_stake.amount += amount;
+        // Update user stake
+        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
+        ctx.accounts.user_stake.amount = amount;
         ctx.accounts.user_stake.stake_account = ctx.accounts.stake_account.key();
+        ctx.accounts.user_stake.rewards_earned = 0;
         ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
-        ctx.accounts.state.total_staked += amount;
 
-        msg!("Staked {} to validator {}", amount, validator);
+        // Update protocol state
+        ctx.accounts.state.total_staked += amount;
+        ctx.accounts.state.total_users += 1;
+
         Ok(())
     }
 }
@@ -129,26 +72,23 @@ pub struct CreateStakeAccount<'info> {
     pub user_stake: Account<'info, UserStake>,
     #[account(mut)]
     pub user: Signer<'info>,
-    /// CHECK: vault
+    /// CHECK: vault PDA
     #[account(mut, seeds = [b"vault"], bump)]
-    pub vault: AccountInfo<'info>,
-    /// CHECK: stake account
+    pub vault: UncheckedAccount<'info>,
+    /// CHECK: stake account PDA
     #[account(mut, seeds = [b"stake", user.key().as_ref()], bump)]
-    pub stake_account: AccountInfo<'info>,
+    pub stake_account: UncheckedAccount<'info>,
     /// CHECK: vote account
-    pub vote_account: AccountInfo<'info>,
+    pub vote_account: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
     /// CHECK: stake program
-    #[account(address = stake::program::ID)]
-    pub stake_program: AccountInfo<'info>,
+    pub stake_program: UncheckedAccount<'info>,
     /// CHECK: clock
-    #[account(address = sysvar::clock::ID)]
-    pub clock: AccountInfo<'info>,
+    pub clock: UncheckedAccount<'info>,
     /// CHECK: stake history
-    #[account(address = sysvar::stake_history::ID)]
-    pub stake_history: AccountInfo<'info>,
+    pub stake_history: UncheckedAccount<'info>,
     /// CHECK: config
-    pub stake_config: AccountInfo<'info>,
+    pub stake_config: UncheckedAccount<'info>,
 }
 
 #[account]

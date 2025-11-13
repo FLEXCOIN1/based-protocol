@@ -9,7 +9,16 @@
   "instructions": [
     {
       "name": "create_stake_account",
-      "discriminator": [105, 24, 131, 19, 201, 250, 157, 73],
+      "discriminator": [
+        105,
+        24,
+        131,
+        19,
+        201,
+        250,
+        157,
+        73
+      ],
       "accounts": [
         {
           "name": "state",
@@ -18,7 +27,13 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 97, 116, 101]
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
               }
             ]
           }
@@ -30,7 +45,18 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [117, 115, 101, 114, 95, 115, 116, 97, 107, 101]
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -51,7 +77,13 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [118, 97, 117, 108, 116]
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
               }
             ]
           }
@@ -63,7 +95,13 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 97, 107, 101]
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -80,16 +118,13 @@
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "stake_program",
-          "address": "Stake11111111111111111111111111111111111111"
+          "name": "stake_program"
         },
         {
-          "name": "clock",
-          "address": "SysvarC1ock11111111111111111111111111111111"
+          "name": "clock"
         },
         {
-          "name": "stake_history",
-          "address": "SysvarStakeHistory1111111111111111111111111"
+          "name": "stake_history"
         },
         {
           "name": "stake_config"
@@ -101,14 +136,23 @@
           "type": "u64"
         },
         {
-          "name": "validator",
+          "name": "_validator",
           "type": "pubkey"
         }
       ]
     },
     {
       "name": "initialize",
-      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
       "accounts": [
         {
           "name": "state",
@@ -117,7 +161,13 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 97, 116, 101]
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
               }
             ]
           }
@@ -138,11 +188,29 @@
   "accounts": [
     {
       "name": "ProtocolState",
-      "discriminator": [33, 51, 173, 134, 35, 140, 195, 248]
+      "discriminator": [
+        33,
+        51,
+        173,
+        134,
+        35,
+        140,
+        195,
+        248
+      ]
     },
     {
       "name": "UserStake",
-      "discriminator": [102, 53, 163, 107, 9, 138, 87, 153]
+      "discriminator": [
+        102,
+        53,
+        163,
+        107,
+        9,
+        138,
+        87,
+        153
+      ]
     }
   ],
   "types": [
