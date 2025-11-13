@@ -19,29 +19,15 @@ export async function depositSOL(
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
       const program = await getProgram(anchorWallet);
 
-      // Derive the user stake PDA
-      const [userStakePda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
-        program.programId
-      );
-
-      // Check if user stake account exists
-      const connection = program.provider.connection;
-      const accountInfo = await connection.getAccountInfo(userStakePda);
-
-      // If account doesn't exist, we need to initialize it
-      // The deposit instruction should handle this with init_if_needed
-      // but we log it for debugging
-      if (!accountInfo) {
-        console.log('Creating new UserStake account for first-time staker...');
-      }
-
       // Convert SOL to lamports
       const amountLamports = Math.floor(amount * 1_000_000_000);
 
-      // Call deposit - it should create the account if it doesn't exist
+      // Validator vote account (devnet validator)
+      const validatorVote = new PublicKey('DcDLRm1ZwcXfeHE3XwjB61dbJnk1f6XF3KeEqJqe6oPA');
+
+      // Call create_stake_account - Anchor will auto-derive PDAs from the IDL
       const signature = await program.methods
-        .deposit(amountLamports, null) // amount in lamports, no referrer
+        .createStakeAccount(amountLamports, validatorVote)
         .accounts({
           voteAccount: VALIDATOR_VOTE,
           systemProgram: SystemProgram.programId,
@@ -119,9 +105,9 @@ export async function getStakeInfo(walletPublicKey: PublicKey, wallet: any) {
     // Convert BN to number, handling lamports (1 SOL = 1B lamports)
     return {
       amount: stakeData.amount?.toNumber() / 1_000_000_000 || 0,
-      rewardsEarned: stakeData.totalRewardsEarned?.toNumber() / 1_000_000_000 || 0,
+      rewardsEarned: stakeData.rewardsEarned?.toNumber() / 1_000_000_000 || 0,
       lastStakeTime: stakeData.lastStakeTime?.toNumber() || 0,
-      stakeAccount: walletPublicKey.toString(),
+      stakeAccount: stakeData.stakeAccount?.toString() || '',
     };
   } catch (error: any) {
     console.error('Error fetching stake info:', error);
