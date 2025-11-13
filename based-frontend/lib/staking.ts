@@ -19,10 +19,27 @@ export async function depositSOL(
       const anchorWallet = AnchorWallet.fromWalletAdapter(wallet);
       const program = await getProgram(anchorWallet);
 
+      // Derive the user stake PDA
+      const [userStakePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('user_stake'), walletPublicKey.toBuffer()],
+        program.programId
+      );
+
+      // Check if user stake account exists
+      const connection = program.provider.connection;
+      const accountInfo = await connection.getAccountInfo(userStakePda);
+
+      // If account doesn't exist, we need to initialize it
+      // The deposit instruction should handle this with init_if_needed
+      // but we log it for debugging
+      if (!accountInfo) {
+        console.log('Creating new UserStake account for first-time staker...');
+      }
+
       // Convert SOL to lamports
       const amountLamports = Math.floor(amount * 1_000_000_000);
 
-      // Let Anchor auto-derive the PDAs based on the IDL
+      // Call deposit - it should create the account if it doesn't exist
       const signature = await program.methods
         .deposit(amountLamports, null) // amount in lamports, no referrer
         .accounts({
@@ -30,6 +47,7 @@ export async function depositSOL(
         })
         .rpc();
 
+      console.log('✅ Stake successful! Transaction:', signature);
       return signature;
     });
   } catch (error: any) {

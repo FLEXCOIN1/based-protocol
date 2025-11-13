@@ -42,12 +42,22 @@ export function getUserFriendlyError(error: any): string {
     if (errorMsg.toLowerCase().includes('user') || errorMsg.toLowerCase().includes('stake account')) {
       return 'No staking history found. Start by staking SOL to earn rewards!';
     }
-    return 'Staking pool not initialized. Please contact support.';
+    if (errorMsg.toLowerCase().includes('pool')) {
+      return 'Staking pool not initialized. The pool needs to be set up by the admin. Please contact support.';
+    }
+    return 'Required account not initialized. Please contact support.';
   }
 
   // Invalid account discriminator (account doesn't exist)
   if (errorMsg.includes('Invalid account discriminator')) {
     return 'No staking history found. Stake SOL to get started!';
+  }
+
+  // Account creation errors
+  if (errorMsg.includes('failed to send transaction') || errorMsg.includes('custom program error')) {
+    if (errorMsg.includes('0x0') || errorMsg.includes('0x1')) {
+      return 'Unable to create staking account. Make sure you have enough SOL for rent (~0.003 SOL) plus transaction fees.';
+    }
   }
 
   // Program errors
