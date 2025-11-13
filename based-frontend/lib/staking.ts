@@ -67,12 +67,15 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
 export async function unstakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
   if (!wallet.publicKey || !wallet.connected) throw new Error("Wallet not connected");
 
+  console.log("=== UNSTAKING", amount, "SOL ===");
+
   const freshConnection = new Connection(clusterApiUrl('devnet'), 'confirmed');
   const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
   const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
   const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
 
-  // Unstake discriminator from IDL
+  console.log("PDAs:", { state: state.toString(), userStake: userStake.toString(), vault: vault.toString() });
+
   const discriminator = new Uint8Array([90, 95, 107, 42, 205, 124, 50, 225]);
   const amountBytes = encodeU64(Math.floor(amount * LAMPORTS_PER_SOL));
   const data = new Uint8Array(discriminator.length + amountBytes.length);
@@ -95,9 +98,32 @@ export async function unstakeSOL(wallet: any, amount: number, connection: Connec
   transaction.feePayer = wallet.publicKey;
   const { blockhash } = await freshConnection.getLatestBlockhash('confirmed');
   transaction.recentBlockhash = blockhash;
+
+  console.log("Simulating unstake...");
   
+  try {
+    const simulation = await freshConnection.simulateTransaction(transaction);
+    
+    if (simulation.value.err) {
+      console.error("❌ SIMULATION FAILED:", simulation.value.err);
+      console.error("Logs:", simulation.value.logs);
+      throw new Error("Unstake simulation failed: " + JSON.stringify(simulation.value.err));
+    }
+    
+    console.log("✅ Simulation passed!");
+    console.log("Logs:", simulation.value.logs);
+  } catch (simError: any) {
+    console.error("❌ Simulation error:", simError);
+    throw simError;
+  }
+  
+  console.log("Sending to Phantom...");
   const signature = await wallet.sendTransaction(transaction, freshConnection);
+  
+  console.log("✅ TX SENT:", signature);
   await freshConnection.confirmTransaction(signature, 'confirmed');
+  console.log("✅ UNSTAKE COMPLETE!");
+  
   return signature;
 }
 
@@ -112,10 +138,11 @@ export async function getUserStakeInfo(walletAddress: PublicKey, connection: Con
       return { amount: 0, exists: false };
     }
 
-    // Manual deserialization - skip discriminator (8 bytes)
+    // Read amount: skip discriminator(8) + owner(32) = starts at byte 40
     const data = account.data;
-    const amount = Number(data.readBigUInt64LE(40)); // owner(32) + amount(8) starts at byte 40
+    const amount = Number(data.readBigUInt64LE(40));
     
+    console.log("User stake:", { amount, exists: true });
     return { amount, exists: true };
   } catch (error) {
     console.error("Error fetching stake:", error);
