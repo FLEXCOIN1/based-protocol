@@ -1,132 +1,115 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
-import WalletButton from '@/components/WalletButton';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import WalletButton from '../components/WalletButton';
 import { useState, useEffect } from 'react';
-import { depositSOL, getStakeInfo, CURRENT_APY } from '@/lib/staking';
+import { depositSOL, getStakeInfo, CURRENT_APY } from '../lib/staking';
 import Link from 'next/link';
 
 export default function Home() {
-  const { publicKey, connected } = useWallet();
+  const { connection } = useConnection();
   const wallet = useWallet();
-  const [amount, setAmount] = useState('');
+  const [stakeAmount, setStakeAmount] = useState('0.1');
   const [loading, setLoading] = useState(false);
-  const [stakeInfo, setStakeInfo] = useState<any>(null);
   const [message, setMessage] = useState('');
+  const [userStake, setUserStake] = useState<any>(null);
 
   useEffect(() => {
-    if (connected && publicKey) {
+    if (wallet.publicKey) {
       loadStakeInfo();
     }
-  }, [connected, publicKey]);
+  }, [wallet.publicKey]);
 
   const loadStakeInfo = async () => {
-    if (!publicKey) return;
+    if (!wallet.publicKey) return;
     try {
-      const info = await getStakeInfo(publicKey, wallet);
-      setStakeInfo(info);
-    } catch (e) {
-      console.error(e);
+      const info = await getStakeInfo(wallet.publicKey, connection);
+      setUserStake(info);
+    } catch (error) {
+      console.error('Error loading stake info:', error);
     }
   };
 
   const handleStake = async () => {
-    if (!publicKey || !amount) return;
-    
+    if (!wallet.connected || !wallet.publicKey) {
+      setMessage('❌ Wallet not connected');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
-    
+
     try {
-      const lamports = parseFloat(amount) * 1e9;
-      const sig = await depositSOL(publicKey, lamports, wallet);
-      setMessage(`✅ Staked ${amount} SOL! TX: ${sig.slice(0, 8)}...`);
-      setAmount('');
+      const tx = await depositSOL(wallet, parseFloat(stakeAmount), connection);
+      setMessage(`✅ Staked ${stakeAmount} SOL! TX: ${tx}`);
       await loadStakeInfo();
     } catch (error: any) {
-      setMessage(`❌ ${error.message}`);
+      setMessage(`❌ ${error.message || 'Failed to stake'}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <nav className="border-b border-gray-800 p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">BASED Reserve</h1>
-          <div className="flex gap-4 items-center">
-            <Link href="/dashboard" className="hover:text-purple-400">Dashboard</Link>
-            <Link href="/how-it-works" className="hover:text-purple-400">How It Works</Link>
-            <WalletButton />
-          </div>
-        </div>
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8">
+      <nav className="flex justify-between items-center mb-12">
+        <h1 className="text-3xl font-bold">BASED Protocol</h1>
+        <WalletButton />
       </nav>
 
-      <div className="max-w-4xl mx-auto p-8 mt-12">
-        <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold mb-4">Earn {CURRENT_APY}% APY</h2>
-          <p className="text-xl text-gray-400">Real Solana validator staking. Your SOL earns yield from day one.</p>
-        </div>
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-gray-800 rounded-lg p-8 mb-6">
+          <h2 className="text-2xl mb-4">Stake SOL</h2>
+          <p className="text-gray-400 mb-6">Current APY: {CURRENT_APY}%</p>
 
-        {!connected ? (
-          <div className="bg-gray-900 rounded-lg p-12 text-center">
-            <h3 className="text-2xl font-bold mb-4">Connect Your Wallet</h3>
-            <p className="text-gray-400 mb-6">Start earning validator rewards on your SOL</p>
-            <WalletButton />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {stakeInfo && stakeInfo.amount > 0 && (
-              <div className="bg-purple-900/20 border border-purple-500 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-2">Your Active Stake</h3>
-                <p className="text-3xl font-bold text-purple-400">{(stakeInfo.amount / 1e9).toFixed(4)} SOL</p>
-                <p className="text-gray-400 mt-2">Earning {CURRENT_APY}% APY from validators</p>
-              </div>
-            )}
-
-            <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="text-2xl font-bold mb-4">Stake SOL</h3>
-              
-              <div className="mb-4">
-                <label className="block text-sm mb-2">Amount (SOL)</label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.0"
-                  className="w-full bg-black border border-gray-700 rounded px-4 py-3 text-lg"
-                  step="0.01"
-                  min="0.01"
-                />
-              </div>
-
+          {wallet.connected ? (
+            <>
+              <input
+                type="number"
+                value={stakeAmount}
+                onChange={(e) => setStakeAmount(e.target.value)}
+                className="w-full bg-gray-700 rounded p-3 mb-4 text-white"
+                placeholder="Amount to stake"
+                step="0.1"
+                min="0.1"
+              />
               <button
                 onClick={handleStake}
-                disabled={loading || !amount}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-bold text-lg"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded p-3 font-bold"
               >
-                {loading ? 'Staking...' : `Stake ${amount || '0'} SOL`}
+                {loading ? 'Staking...' : `Stake ${stakeAmount} SOL`}
               </button>
 
-              {message && (
-                <div className={`mt-4 p-3 rounded ${message.includes('✅') ? 'bg-green-900/20 text-green-400' : 'bg-red-900/20 text-red-400'}`}>
-                  {message}
+              {userStake && userStake.exists && (
+                <div className="mt-6 p-4 bg-gray-700 rounded">
+                  <p className="text-sm text-gray-300">Your Staked Amount:</p>
+                  <p className="text-2xl font-bold">{(userStake.stakedAmount.toNumber() / 1e9).toFixed(4)} SOL</p>
                 </div>
               )}
+            </>
+          ) : (
+            <p className="text-center text-gray-400">Connect your wallet to stake</p>
+          )}
 
-              <div className="mt-6 p-4 bg-black rounded-lg">
-                <h4 className="font-bold mb-2">How it works:</h4>
-                <ul className="text-sm text-gray-400 space-y-1">
-                  <li>• Your SOL is delegated to active Solana validators</li>
-                  <li>• Earn ~{CURRENT_APY}% APY from network inflation rewards</li>
-                  <li>• Rewards accrue automatically</li>
-                  <li>• Fully on-chain, non-custodial</li>
-                </ul>
-              </div>
+          {message && (
+            <div className={`mt-4 p-4 rounded ${message.includes('✅') ? 'bg-green-900' : 'bg-red-900'}`}>
+              {message}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/about-based" className="bg-gray-800 p-4 rounded hover:bg-gray-700">
+            <h3 className="font-bold">About BASED</h3>
+            <p className="text-sm text-gray-400">Learn about the protocol</p>
+          </Link>
+          <Link href="/whitepaper" className="bg-gray-800 p-4 rounded hover:bg-gray-700">
+            <h3 className="font-bold">Whitepaper</h3>
+            <p className="text-sm text-gray-400">Read our docs</p>
+          </Link>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
