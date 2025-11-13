@@ -1,14 +1,7 @@
-import type { Idl } from '@coral-xyz/anchor';
 import idlJson from './idl.json';
 
-export const IDL = idlJson as Idl;
+// Export the IDL directly - it's already in the correct format
+export const IDL = idlJson as any;
 
-export type BasedProtocol = {
-  "address": "4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd",
-  "metadata": {
-    "name": "based_protocol",
-    "version": "0.1.0",
-    "spec": "0.1.0",
-    "description": "Created with Anchor"
-  }
-};
+// Export the program ID from the IDL
+export const PROGRAM_ID = idlJson.address;

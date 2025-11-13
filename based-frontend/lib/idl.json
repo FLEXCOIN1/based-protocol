@@ -1123,7 +1123,18 @@
         154,
         24,
         102
-      ]
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "authority", "type": "pubkey"},
+          {"name": "total_staked", "type": "u64"},
+          {"name": "total_burned", "type": "u64"},
+          {"name": "reward_rate", "type": "u64"},
+          {"name": "total_users", "type": "u64"},
+          {"name": "bump", "type": "u8"}
+        ]
+      }
     },
     {
       "name": "TokenStakingPool",
@@ -1136,7 +1147,18 @@
         21,
         213,
         135
-      ]
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "authority", "type": "pubkey"},
+          {"name": "token_mint", "type": "pubkey"},
+          {"name": "total_staked", "type": "u64"},
+          {"name": "reward_rate", "type": "u64"},
+          {"name": "total_users", "type": "u64"},
+          {"name": "bump", "type": "u8"}
+        ]
+      }
     },
     {
       "name": "TokenUserStake",
@@ -1149,7 +1171,25 @@
         120,
         229,
         200
-      ]
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "owner", "type": "pubkey"},
+          {"name": "amount", "type": "u64"},
+          {"name": "last_stake_time", "type": "i64"},
+          {"name": "vesting_start", "type": "i64"},
+          {"name": "multiplier_points", "type": "u64"},
+          {"name": "total_time_staked", "type": "i64"},
+          {"name": "referrer", "type": {"option": "pubkey"}},
+          {"name": "referral_rewards_pending", "type": "u64"},
+          {"name": "total_referral_rewards_claimed", "type": "u64"},
+          {"name": "leaderboard_position", "type": "u64"},
+          {"name": "total_rewards_earned", "type": "u64"},
+          {"name": "pending_rewards", "type": "u64"},
+          {"name": "bump", "type": "u8"}
+        ]
+      }
     },
     {
       "name": "UserStake",
@@ -1162,7 +1202,26 @@
         138,
         87,
         153
-      ]
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "owner", "type": "pubkey"},
+          {"name": "amount", "type": "u64"},
+          {"name": "reward_debt", "type": "u64"},
+          {"name": "last_stake_time", "type": "i64"},
+          {"name": "escrowed_rewards", "type": "u64"},
+          {"name": "vesting_start", "type": "i64"},
+          {"name": "multiplier_points", "type": "u64"},
+          {"name": "total_time_staked", "type": "i64"},
+          {"name": "referrer", "type": {"option": "pubkey"}},
+          {"name": "referral_rewards_pending", "type": "u64"},
+          {"name": "total_referral_rewards_claimed", "type": "u64"},
+          {"name": "leaderboard_position", "type": "u64"},
+          {"name": "total_rewards_earned", "type": "u64"},
+          {"name": "bump", "type": "u8"}
+        ]
+      }
     },
     {
       "name": "VeBasedLock",
@@ -1175,7 +1234,19 @@
         12,
         174,
         184
-      ]
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "owner", "type": "pubkey"},
+          {"name": "amount", "type": "u64"},
+          {"name": "lock_start", "type": "i64"},
+          {"name": "lock_end", "type": "i64"},
+          {"name": "lock_duration_days", "type": "u64"},
+          {"name": "ve_based_balance", "type": "u64"},
+          {"name": "bump", "type": "u8"}
+        ]
+      }
     }
   ],
   "errors": [
