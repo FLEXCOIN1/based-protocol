@@ -1,4 +1,4 @@
-import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, SYSVAR_CLOCK_PUBKEY, SYSVAR_STAKE_HISTORY_PUBKEY, sendAndConfirmTransaction } from "@solana/web3.js";
+import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, SYSVAR_CLOCK_PUBKEY, SYSVAR_STAKE_HISTORY_PUBKEY, clusterApiUrl } from "@solana/web3.js";
 
 const PROGRAM_ID = new PublicKey("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
 const STAKE_PROGRAM_ID = new PublicKey("Stake11111111111111111111111111111111111111");
@@ -17,18 +17,23 @@ function encodeU64(value: number): Uint8Array {
   return arr;
 }
 
-export async function stakeSOL(wallet: any, amount: number, connection: Connection): Promise<string> {
+export async function stakeSOL(wallet: any, amount: number, _connection: Connection): Promise<string> {
   if (!wallet.publicKey || !wallet.connected) {
     throw new Error("Wallet not connected");
   }
 
   console.log("=== STAKING", amount, "SOL ===");
 
+  // Create a NEW clean connection - ignore the passed one
+  const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+
   // Find PDAs
   const [state] = PublicKey.findProgramAddressSync([Buffer.from("state")], PROGRAM_ID);
   const [userStake] = PublicKey.findProgramAddressSync([Buffer.from("user_stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
   const [vault] = PublicKey.findProgramAddressSync([Buffer.from("vault")], PROGRAM_ID);
   const [stakeAccount] = PublicKey.findProgramAddressSync([Buffer.from("stake"), wallet.publicKey.toBuffer()], PROGRAM_ID);
+
+  console.log("PDAs:", { state: state.toString(), userStake: userStake.toString() });
 
   // Build instruction data
   const discriminator = new Uint8Array([105, 24, 131, 19, 201, 250, 157, 73]);
@@ -60,18 +65,15 @@ export async function stakeSOL(wallet: any, amount: number, connection: Connecti
     data: Buffer.from(data),
   });
 
-  // Build and send transaction
   const transaction = new Transaction().add(instruction);
   
-  console.log("Sending transaction...");
+  console.log("Sending transaction with FRESH connection...");
   
-  // Use wallet's sendTransaction method (standard for all wallets)
   const signature = await wallet.sendTransaction(transaction, connection);
   
-  console.log("✅ TX SENT:", signature);
+  console.log("✅ SENT:", signature);
   console.log("https://explorer.solana.com/tx/" + signature + "?cluster=devnet");
   
-  // Wait for confirmation
   await connection.confirmTransaction(signature, 'confirmed');
   console.log("✅ CONFIRMED!");
   
