@@ -3,10 +3,6 @@ use anchor_lang::solana_program::system_instruction;
 
 declare_id!("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
 
-const STAKE_PROGRAM_ID: &str = "Stake11111111111111111111111111111111111111";
-const SYSVAR_CLOCK_ID: &str = "SysvarC1ock11111111111111111111111111111111";
-const SYSVAR_STAKE_HISTORY_ID: &str = "SysvarStakeHistory1111111111111111111111111";
-
 #[program]
 pub mod based_protocol {
     use super::*;
@@ -66,7 +62,7 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct CreateStakeAccount<'info> {
-    #[account(mut, seeds = [b"state"], bump = state.bump)]
+    #[account(mut, seeds = [b"state"], bump)]
     pub state: Account<'info, ProtocolState>,
     #[account(init_if_needed, payer = user, space = 8 + 88, seeds = [b"user_stake", user.key().as_ref()], bump)]
     pub user_stake: Account<'info, UserStake>,
