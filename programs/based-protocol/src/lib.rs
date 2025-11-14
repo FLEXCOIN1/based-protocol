@@ -1,7 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_instruction;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
 declare_id!("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
+
+// USDC devnet: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+const USDC_MINT: &str = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
 
 #[program]
 pub mod based_protocol {
@@ -16,10 +20,10 @@ pub mod based_protocol {
         Ok(())
     }
 
-    pub fn create_stake_account(
-        ctx: Context<CreateStakeAccount>,
+    // SOL STAKING
+    pub fn stake_sol(
+        ctx: Context<StakeSOL>,
         amount: u64,
-        _validator: Pubkey,
     ) -> Result<()> {
         let transfer_ix = system_instruction::transfer(
             ctx.accounts.user.key,
@@ -36,11 +40,9 @@ pub mod based_protocol {
         )?;
 
         ctx.accounts.user_stake.owner = ctx.accounts.user.key();
-        ctx.accounts.user_stake.amount = amount;
-        ctx.accounts.user_stake.stake_account = ctx.accounts.stake_account.key();
-        ctx.accounts.user_stake.rewards_earned = 0;
+        ctx.accounts.user_stake.sol_amount = amount;
+        ctx.accounts.user_stake.usdc_amount = 0;
         ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
-        ctx.accounts.user_stake.asset_type = AssetType::SOL;
 
         ctx.accounts.state.total_staked += amount;
         ctx.accounts.state.total_users += 1;
@@ -48,8 +50,32 @@ pub mod based_protocol {
         Ok(())
     }
 
-    pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
-        require!(ctx.accounts.user_stake.amount >= amount, ErrorCode::InsufficientStake);
+    // USDC STAKING
+    pub fn stake_usdc(
+        ctx: Context<StakeUSDC>,
+        amount: u64,
+    ) -> Result<()> {
+        // Transfer USDC from user to vault
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.user_usdc.to_account_info(),
+            to: ctx.accounts.vault_usdc.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, amount)?;
+
+        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
+        ctx.accounts.user_stake.usdc_amount = amount;
+        ctx.accounts.user_stake.sol_amount = 0;
+        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
+
+        Ok(())
+    }
+
+    // UNSTAKE SOL
+    pub fn unstake_sol(ctx: Context<UnstakeSOL>, amount: u64) -> Result<()> {
+        require!(ctx.accounts.user_stake.sol_amount >= amount, ErrorCode::InsufficientStake);
         
         let vault_bump = ctx.bumps.vault;
         let vault_seeds = &[b"vault".as_ref(), &[vault_bump]];
@@ -71,38 +97,31 @@ pub mod based_protocol {
             signer_seeds,
         )?;
         
-        ctx.accounts.user_stake.amount -= amount;
+        ctx.accounts.user_stake.sol_amount -= amount;
         ctx.accounts.state.total_staked -= amount;
         
         Ok(())
     }
 
-    // NEW: Stake USDC
-    pub fn stake_usdc(
-        ctx: Context<StakeToken>,
-        amount: u64,
-    ) -> Result<()> {
-        // Token transfer logic here (simplified for now)
-        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
-        ctx.accounts.user_stake.amount = amount;
-        ctx.accounts.user_stake.rewards_earned = 0;
-        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
-        ctx.accounts.user_stake.asset_type = AssetType::USDC;
+    // UNSTAKE USDC
+    pub fn unstake_usdc(ctx: Context<UnstakeUSDC>, amount: u64) -> Result<()> {
+        require!(ctx.accounts.user_stake.usdc_amount >= amount, ErrorCode::InsufficientStake);
+        
+        let vault_bump = ctx.bumps.vault_usdc;
+        let vault_seeds = &[b"vault_usdc".as_ref(), &[vault_bump]];
+        let signer_seeds = &[&vault_seeds[..]];
 
-        Ok(())
-    }
-
-    // NEW: Stake mSOL (Marinade staked SOL)
-    pub fn stake_msol(
-        ctx: Context<StakeToken>,
-        amount: u64,
-    ) -> Result<()> {
-        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
-        ctx.accounts.user_stake.amount = amount;
-        ctx.accounts.user_stake.rewards_earned = 0;
-        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
-        ctx.accounts.user_stake.asset_type = AssetType::MSOL;
-
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.vault_usdc.to_account_info(),
+            to: ctx.accounts.user_usdc.to_account_info(),
+            authority: ctx.accounts.vault_usdc.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        token::transfer(cpi_ctx, amount)?;
+        
+        ctx.accounts.user_stake.usdc_amount -= amount;
+        
         Ok(())
     }
 }
@@ -117,34 +136,35 @@ pub struct Initialize<'info> {
 }
 
 #[derive(Accounts)]
-pub struct CreateStakeAccount<'info> {
+pub struct StakeSOL<'info> {
     #[account(mut, seeds = [b"state"], bump)]
     pub state: Account<'info, ProtocolState>,
-    #[account(init_if_needed, payer = user, space = 8 + 96, seeds = [b"user_stake", user.key().as_ref()], bump)]
+    #[account(init_if_needed, payer = user, space = 8 + 104, seeds = [b"user_stake", user.key().as_ref()], bump)]
     pub user_stake: Account<'info, UserStake>,
     #[account(mut)]
     pub user: Signer<'info>,
     /// CHECK: vault PDA
     #[account(mut, seeds = [b"vault"], bump)]
     pub vault: UncheckedAccount<'info>,
-    /// CHECK: stake account PDA
-    #[account(mut, seeds = [b"stake", user.key().as_ref()], bump)]
-    pub stake_account: UncheckedAccount<'info>,
-    /// CHECK: vote account
-    pub vote_account: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
-    /// CHECK: stake program
-    pub stake_program: UncheckedAccount<'info>,
-    /// CHECK: clock
-    pub clock: UncheckedAccount<'info>,
-    /// CHECK: stake history
-    pub stake_history: UncheckedAccount<'info>,
-    /// CHECK: config
-    pub stake_config: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
-pub struct Unstake<'info> {
+pub struct StakeUSDC<'info> {
+    #[account(init_if_needed, payer = user, space = 8 + 104, seeds = [b"user_stake", user.key().as_ref()], bump)]
+    pub user_stake: Account<'info, UserStake>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    #[account(mut)]
+    pub user_usdc: Account<'info, TokenAccount>,
+    #[account(mut, seeds = [b"vault_usdc"], bump)]
+    pub vault_usdc: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UnstakeSOL<'info> {
     #[account(mut, seeds = [b"state"], bump)]
     pub state: Account<'info, ProtocolState>,
     #[account(mut, seeds = [b"user_stake", user.key().as_ref()], bump)]
@@ -158,12 +178,16 @@ pub struct Unstake<'info> {
 }
 
 #[derive(Accounts)]
-pub struct StakeToken<'info> {
-    #[account(init_if_needed, payer = user, space = 8 + 96, seeds = [b"user_stake", user.key().as_ref()], bump)]
+pub struct UnstakeUSDC<'info> {
+    #[account(mut, seeds = [b"user_stake", user.key().as_ref()], bump)]
     pub user_stake: Account<'info, UserStake>,
     #[account(mut)]
     pub user: Signer<'info>,
-    pub system_program: Program<'info, System>,
+    #[account(mut)]
+    pub user_usdc: Account<'info, TokenAccount>,
+    #[account(mut, seeds = [b"vault_usdc"], bump)]
+    pub vault_usdc: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
 }
 
 #[account]
@@ -177,21 +201,11 @@ pub struct ProtocolState {
 
 #[account]
 pub struct UserStake {
-    pub owner: Pubkey,
-    pub amount: u64,
-    pub stake_account: Pubkey,
-    pub rewards_earned: u64,
-    pub last_stake_time: i64,
-    pub asset_type: AssetType,
-}
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
-pub enum AssetType {
-    SOL,
-    USDC,
-    MSOL,
-    ETH,
-    BTC,
+    pub owner: Pubkey,           // 32
+    pub sol_amount: u64,          // 8
+    pub usdc_amount: u64,         // 8
+    pub rewards_earned: u64,      // 8
+    pub last_stake_time: i64,     // 8
 }
 
 #[error_code]
