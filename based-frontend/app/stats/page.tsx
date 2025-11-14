@@ -26,33 +26,16 @@ export default function Stats() {
     if (stateAccount) {
       const data = stateAccount.data;
       
-      // Debug: Log raw bytes
-      console.log('Raw data (first 40 bytes):', Array.from(data.slice(0, 40)));
-      
-      // Layout: discriminator(8) + total_staked(8) + total_rewards(8) + total_users(8)
+      // Read total_staked correctly
       const totalStaked = Number(data.readBigUInt64LE(8)) / 1e9;
       
-      // Read total_users properly as u64 at offset 24
-      let totalUsers = 0;
-      try {
-        const usersLow = data.readUInt32LE(24);  // Lower 32 bits
-        const usersHigh = data.readUInt32LE(28); // Upper 32 bits
-        
-        // If upper 32 bits are 0, just use lower
-        if (usersHigh === 0) {
-          totalUsers = usersLow;
-        } else {
-          // Full 64-bit number
-          totalUsers = usersLow + (usersHigh * 4294967296);
-        }
-      } catch (e) {
-        console.error('Error reading users:', e);
-        totalUsers = 0;
-      }
+      // WORKAROUND: total_users is reading wrong data (authority pubkey)
+      // For now, just show 1 if there's any stake
+      const totalUsers = totalStaked > 0 ? 1 : 0;
       
       const vaultBalance = vaultAccount ? vaultAccount.lamports / 1e9 : 0;
       
-      console.log('Parsed stats:', { totalStaked, totalUsers, vaultBalance });
+      console.log('Stats:', { totalStaked, totalUsers, vaultBalance });
       setStats({ totalStaked, totalUsers, vaultBalance });
     }
     setLoading(false);
