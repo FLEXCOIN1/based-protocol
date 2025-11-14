@@ -1,188 +1,262 @@
 'use client';
 
 import Link from 'next/link';
-import WalletButton from '@/components/WalletButton';
+import WalletButton from '../../components/WalletButton';
 
 export default function Tokenomics() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-8 items-center">
-            <Link href="/">
-              <h1 className="text-2xl font-bold text-blue-600 cursor-pointer">BASED Reserve</h1>
-            </Link>
-            <Link href="/how-it-works" className="text-sm font-medium text-gray-600 hover:text-blue-600">How It Works</Link>
-            <Link href="/tokenomics" className="text-sm font-medium text-blue-600">Tokenomics</Link>
-            <Link href="/growth" className="text-sm font-medium text-gray-600 hover:text-blue-600">Growth Strategy</Link>
-            <Link href="/about-based" className="text-sm font-medium text-gray-600 hover:text-blue-600">About $BSOL</Link>
-            <Link href="/faq" className="text-sm font-medium text-gray-600 hover:text-blue-600">FAQ</Link>
-          </div>
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold text-white">← BASED Protocol</Link>
           <WalletButton />
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-4 text-gray-900">$BSOL Tokenomics</h1>
-          <p className="text-xl text-gray-600">Revenue-Backed. Deflationary. Community-Owned.</p>
-        </div>
-
-        {/* Token Supply */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">Token Supply</h2>
-            <div className="space-y-6">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Supply</p>
-                <p className="text-4xl font-bold text-gray-900">1,000,000,000</p>
-                <p className="text-sm text-gray-500">1 Billion $BSOL tokens</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Circulating at Launch</p>
-                <p className="text-4xl font-bold text-blue-600">800,000,000</p>
-                <p className="text-sm text-gray-500">80% immediately available</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">Token Allocation</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-gray-700">Liquidity Pool</span>
-                <span className="font-bold text-gray-900">60%</span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-gray-700">Community Treasury</span>
-                <span className="font-bold text-gray-900">20%</span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-gray-700">Team (2yr vest)</span>
-                <span className="font-bold text-gray-900">10%</span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-gray-700">Marketing</span>
-                <span className="font-bold text-gray-900">5%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700">Development</span>
-                <span className="font-bold text-gray-900">5%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Revenue Distribution */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-12 text-white mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">Revenue Distribution Model</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-6xl font-bold mb-3">40%</div>
-              <h3 className="text-xl font-bold mb-2">Buyback & Burn</h3>
-              <p className="text-blue-100 text-sm">
-                Protocol revenue used to purchase $BSOL from market and burn permanently
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-6xl font-bold mb-3">40%</div>
-              <h3 className="text-xl font-bold mb-2">Staking Rewards</h3>
-              <p className="text-blue-100 text-sm">
-                Distributed to members based on account tier and deposit duration
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-6xl font-bold mb-3">20%</div>
-              <h3 className="text-xl font-bold mb-2">Protocol Development</h3>
-              <p className="text-blue-100 text-sm">
-                Platform maintenance, security audits, and new features
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Revenue Sources */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-gray-900 text-center">Revenue Sources</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold mb-3 text-gray-900">Deposit Fees</h3>
-              <p className="text-4xl font-bold text-blue-600 mb-2">0.1%</p>
-              <p className="text-sm text-gray-600">Small fee on all deposits to fund protocol operations</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold mb-3 text-gray-900">Withdrawal Penalties</h3>
-              <p className="text-4xl font-bold text-orange-600 mb-2">5-25%</p>
-              <p className="text-sm text-gray-600">Early withdrawal fees that decrease over time</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold mb-3 text-gray-900">Trading Fees</h3>
-              <p className="text-4xl font-bold text-green-600 mb-2">0.3%</p>
-              <p className="text-sm text-gray-600">Standard DEX trading fees from $BSOL liquidity pools</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Deflationary Mechanism */}
-        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">Deflationary Mechanism</h2>
-          <div className="space-y-6">
-            <p className="text-gray-700">
-              Unlike inflationary tokens that constantly increase supply, $BSOL implements aggressive deflationary tokenomics 
-              through automatic buyback and burn mechanisms.
-            </p>
-            <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Automatic Buyback & Burn</h3>
-              <p className="text-gray-700">
-                40% of ALL protocol revenue is automatically used to purchase $BSOL tokens from the open market and burn them 
-                permanently. This creates constant buy pressure while reducing total supply—a proven model used by successful 
-                DeFi protocols generating millions in revenue.
-              </p>
-            </div>
-            <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-r">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Simple Math</h3>
-              <p className="text-gray-700">
-                Decreasing supply + steady demand = natural price appreciation. As the protocol grows and more revenue flows 
-                through, more tokens are burned, making remaining tokens increasingly scarce and valuable.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Governance */}
-        <div className="bg-white border border-gray-200 rounded-lg p-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">Governance Rights</h2>
-          <p className="text-gray-700 mb-6">
-            $BSOL holders participate in protocol governance, voting on key decisions:
+      <div className="max-w-6xl mx-auto px-8 py-20">
+        <div className="text-center mb-20">
+          <h1 className="text-6xl font-black text-white mb-6">
+            $BASED Tokenomics
+          </h1>
+          <p className="text-2xl text-gray-300">
+            Deflationary. Revenue-sharing. Built to last.
           </p>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="border border-gray-200 rounded-lg p-4">
-              <p className="font-semibold text-gray-900 mb-1">Fee Structure Changes</p>
-              <p className="text-sm text-gray-600">Adjust deposit fees, withdrawal penalties, revenue distribution</p>
+        </div>
+
+        {/* Token Distribution */}
+        <div className="bg-white/5 border-2 border-white/20 rounded-3xl p-12 mb-16 backdrop-blur-sm">
+          <h2 className="text-4xl font-bold text-white mb-8 text-center">Token Distribution</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div className="bg-blue-500/20 border border-blue-500 rounded-2xl p-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-white">Public Sale</h3>
+                <p className="text-4xl font-black text-blue-400">80%</p>
+              </div>
+              <p className="text-gray-300">
+                Fair launch on Pump.fun. Available to everyone. No private sales, no VCs.
+              </p>
             </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <p className="font-semibold text-gray-900 mb-1">New Features</p>
-              <p className="text-sm text-gray-600">Vote on platform upgrades and new banking services</p>
+
+            <div className="bg-purple-500/20 border border-purple-500 rounded-2xl p-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-white">Protocol Treasury</h3>
+                <p className="text-4xl font-black text-purple-400">10%</p>
+              </div>
+              <p className="text-gray-300">
+                For liquidity, partnerships, and protocol development. 6-month linear vesting.
+              </p>
             </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <p className="font-semibold text-gray-900 mb-1">Treasury Allocation</p>
-              <p className="text-sm text-gray-600">Decide how community treasury funds are deployed</p>
+
+            <div className="bg-pink-500/20 border border-pink-500 rounded-2xl p-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-white">Team</h3>
+                <p className="text-4xl font-black text-pink-400">5%</p>
+              </div>
+              <p className="text-gray-300">
+                12-month lock, then 24-month linear vest. Team eats last.
+              </p>
             </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <p className="font-semibold text-gray-900 mb-1">Partnership Approvals</p>
-              <p className="text-sm text-gray-600">Review and approve strategic partnerships and integrations</p>
+
+            <div className="bg-green-500/20 border border-green-500 rounded-2xl p-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-white">Liquidity Pool</h3>
+                <p className="text-4xl font-black text-green-400">5%</p>
+              </div>
+              <p className="text-gray-300">
+                Paired with SOL for initial liquidity. LP tokens burned forever.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-yellow-500/20 border-2 border-yellow-500 rounded-xl p-6 text-center">
+            <p className="text-yellow-300 font-bold text-xl">
+              🔥 Total Supply: 1,000,000,000 $BASED (1 Billion)
+            </p>
+            <p className="text-yellow-200 mt-2">
+              Supply decreases over time through burns
+            </p>
+          </div>
+        </div>
+
+        {/* Fee Structure */}
+        <div className="bg-gradient-to-br from-blue-900/50 to-purple-900/50 border-2 border-blue-500 rounded-3xl p-12 mb-16">
+          <h2 className="text-4xl font-bold text-white mb-8 text-center">Protocol Fee Structure</h2>
+          
+          <div className="space-y-6 mb-8">
+            <div className="bg-black/40 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white mb-4">Deposit Fees</h3>
+              <div className="space-y-3 text-gray-300">
+                <p>• Conservative Tier: <span className="text-white font-bold">0.1%</span></p>
+                <p>• Aggressive Tier: <span className="text-white font-bold">0.05%</span> (50% discount for $BASED holders)</p>
+                <p>• Life Changing Tier: <span className="text-white font-bold">0%</span> (FREE for big $BASED holders)</p>
+              </div>
+            </div>
+
+            <div className="bg-black/40 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white mb-4">Management & Performance Fees</h3>
+              <div className="space-y-3 text-gray-300">
+                <p>• Annual Management Fee: <span className="text-white font-bold">2%</span> of AUM</p>
+                <p>• Performance Fee: <span className="text-white font-bold">20%</span> of profits above 8% APY</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-orange-500/30 to-red-500/30 border-2 border-orange-500 rounded-2xl p-8">
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">Where Fees Go</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-5xl mb-3">📈</div>
+                <p className="text-3xl font-black text-blue-400 mb-2">50%</p>
+                <p className="text-white font-semibold">Buyback $BASED</p>
+                <p className="text-sm text-gray-300 mt-2">From open market via Jupiter</p>
+              </div>
+              <div className="text-center">
+                <div className="text-5xl mb-3">🔥</div>
+                <p className="text-3xl font-black text-red-400 mb-2">25%</p>
+                <p className="text-white font-semibold">Burn Forever</p>
+                <p className="text-sm text-gray-300 mt-2">Permanently destroyed</p>
+              </div>
+              <div className="text-center">
+                <div className="text-5xl mb-3">💰</div>
+                <p className="text-3xl font-black text-green-400 mb-2">25%</p>
+                <p className="text-white font-semibold">Staker Rewards</p>
+                <p className="text-sm text-gray-300 mt-2">Distributed to holders</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-16 text-center">
-          <Link href="/">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold">
-              Get Started
-            </button>
-          </Link>
+        {/* Deflationary Mechanics */}
+        <div className="bg-gradient-to-br from-red-900/50 to-orange-900/50 border-2 border-red-500 rounded-3xl p-12 mb-16">
+          <h2 className="text-4xl font-bold text-white mb-8 text-center">🔥 Deflationary by Design</h2>
+          
+          <div className="space-y-6 text-xl text-gray-300">
+            <div className="bg-black/40 rounded-xl p-6">
+              <p className="font-bold text-white mb-2">Continuous Burns:</p>
+              <p>25% of ALL protocol fees are used to buy $BASED, then permanently burned. As the fund grows, burn rate increases.</p>
+            </div>
+
+            <div className="bg-black/40 rounded-xl p-6">
+              <p className="font-bold text-white mb-2">Supply Decreases Forever:</p>
+              <p>Starting supply: 1B tokens. Over time, supply shrinks. Same demand + less supply = higher price.</p>
+            </div>
+
+            <div className="bg-black/40 rounded-xl p-6">
+              <p className="font-bold text-white mb-2">Example Math:</p>
+              <p>If protocol manages $10M → ~$450K annual fees → $112K buyback → $56K worth burned yearly</p>
+              <p className="text-yellow-300 mt-3">At $0.10 per token = 560,000 tokens burned per year</p>
+            </div>
+          </div>
+
+          <div className="mt-8 bg-red-500/20 border border-red-500 rounded-xl p-6 text-center">
+            <p className="text-2xl font-bold text-red-300">
+              Every single transaction makes $BASED more scarce
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+
+        {/* Value Accrual */}
+        <div className="bg-gradient-to-br from-green-900/50 to-blue-900/50 border-2 border-green-500 rounded-3xl p-12 mb-16">
+          <h2 className="text-4xl font-bold text-white mb-8 text-center">How Value Accrues to $BASED</h2>
+          
+          <div className="space-y-6">
+            <div className="bg-black/40 rounded-xl p-8 border-l-4 border-blue-500">
+              <h3 className="text-2xl font-bold text-blue-400 mb-3">1. Constant Buying Pressure</h3>
+              <p className="text-gray-300 text-lg">
+                50% of every fee goes to market buying $BASED. More users = more fees = more buying.
+              </p>
+            </div>
+
+            <div className="bg-black/40 rounded-xl p-8 border-l-4 border-purple-500">
+              <h3 className="text-2xl font-bold text-purple-400 mb-3">2. Decreasing Supply</h3>
+              <p className="text-gray-300 text-lg">
+                25% of fees burned forever. Supply only goes down, never up.
+              </p>
+            </div>
+
+            <div className="bg-black/40 rounded-xl p-8 border-l-4 border-pink-500">
+              <h3 className="text-2xl font-bold text-pink-400 mb-3">3. Revenue Distribution</h3>
+              <p className="text-gray-300 text-lg">
+                25% of fees distributed to stakers. Hold = earn passive income from protocol revenue.
+              </p>
+            </div>
+
+            <div className="bg-black/40 rounded-xl p-8 border-l-4 border-green-500">
+              <h3 className="text-2xl font-bold text-green-400 mb-3">4. Utility Demand</h3>
+              <p className="text-gray-300 text-lg">
+                Need $BASED to access better strategies. Want 20%+ APY? Gotta hold the token.
+              </p>
+            </div>
+
+            <div className="bg-black/40 rounded-xl p-8 border-l-4 border-yellow-500">
+              <h3 className="text-2xl font-bold text-yellow-400 mb-3">5. Fee Discounts</h3>
+              <p className="text-gray-300 text-lg">
+                Hold 10K tokens = 50% off fees. Hold 50K = FREE deposits. Saves real money.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Comparison */}
+        <div className="bg-white/5 border-2 border-white/20 rounded-3xl p-12 backdrop-blur-sm">
+          <h2 className="text-4xl font-bold text-white mb-8 text-center">vs Other Tokens</h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-white/20">
+                  <th className="py-4 px-6 text-white font-bold text-lg"></th>
+                  <th className="py-4 px-6 text-green-400 font-bold text-lg">$BASED</th>
+                  <th className="py-4 px-6 text-gray-400 font-bold text-lg">Typical Meme Coin</th>
+                  <th className="py-4 px-6 text-gray-400 font-bold text-lg">Other DeFi Tokens</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-300">
+                <tr className="border-b border-white/10">
+                  <td className="py-4 px-6 font-semibold">Real Utility</td>
+                  <td className="py-4 px-6 text-green-400">✓ Access to fund</td>
+                  <td className="py-4 px-6 text-red-400">✗ None</td>
+                  <td className="py-4 px-6 text-yellow-400">~ Governance only</td>
+                </tr>
+                <tr className="border-b border-white/10">
+                  <td className="py-4 px-6 font-semibold">Revenue Share</td>
+                  <td className="py-4 px-6 text-green-400">✓ 25% of fees</td>
+                  <td className="py-4 px-6 text-red-400">✗ None</td>
+                  <td className="py-4 px-6 text-red-400">✗ Rare</td>
+                </tr>
+                <tr className="border-b border-white/10">
+                  <td className="py-4 px-6 font-semibold">Buyback & Burn</td>
+                  <td className="py-4 px-6 text-green-400">✓ Automatic</td>
+                  <td className="py-4 px-6 text-yellow-400">~ Sometimes</td>
+                  <td className="py-4 px-6 text-red-400">✗ Rarely</td>
+                </tr>
+                <tr className="border-b border-white/10">
+                  <td className="py-4 px-6 font-semibold">Fee Discounts</td>
+                  <td className="py-4 px-6 text-green-400">✓ Up to 100%</td>
+                  <td className="py-4 px-6 text-red-400">✗ N/A</td>
+                  <td className="py-4 px-6 text-yellow-400">~ Some</td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-6 font-semibold">Real Yield Source</td>
+                  <td className="py-4 px-6 text-green-400">✓ DeFi fund fees</td>
+                  <td className="py-4 px-6 text-red-400">✗ None</td>
+                  <td className="py-4 px-6 text-green-400">✓ Protocol fees</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-2xl font-bold text-white mb-4">
+              $BASED isn't a meme. It's a business model.
+            </p>
+            <p className="text-xl text-gray-300">
+              Token value backed by real protocol revenue, not hype.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

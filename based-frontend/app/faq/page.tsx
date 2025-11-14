@@ -1,249 +1,134 @@
 'use client';
 
 import Link from 'next/link';
-import WalletButton from '@/components/WalletButton';
+import WalletButton from '../../components/WalletButton';
+import { useState } from 'react';
 
 export default function FAQ() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  const faqs = [
+    {
+      q: "What is BASED Protocol?",
+      a: "BASED Protocol is a professional DeFi fund that manages your crypto assets across multiple high-yielding protocols on Solana (and eventually other chains). We target 15-20% annual returns through active management, leverage, and yield optimization. The $BASED token acts as your access key - the more you hold, the better strategies you unlock."
+    },
+    {
+      q: "How does $BASED token have value?",
+      a: "Unlike most tokens, $BASED has real utility: (1) Access Key - hold it to unlock higher-yield strategies, (2) Revenue Share - stake it to earn from protocol fees, (3) Fee Discounts - hold 10K tokens = 50% off fees, 50K tokens = free deposits, (4) Buyback & Burn - 50% of all protocol fees buy $BASED from the market, with half burned forever and half distributed to stakers."
+    },
+    {
+      q: "What are the three strategy tiers?",
+      a: "Conservative (free): Blue-chip assets (USDC, SOL, ETH) with 10-12% APY targets. Aggressive (10K $BASED required): Adds leveraged positions and LP farming for 15-20% APY. Life Changing (50K $BASED required): Adds calculated meme plays and moonshots for 30-100%+ APY potential (high risk)."
+    },
+    {
+      q: "What are the fees?",
+      a: "Deposit fees: 0.1% Conservative, 0.05% Aggressive, 0% Life Changing. Plus standard 2/20 structure (2% annual management fee, 20% performance fee on profits above 8%). All fees contribute to $BASED buyback/burn/rewards."
+    },
+    {
+      q: "Is this safe? What are the risks?",
+      a: "All DeFi carries risk. Main risks: (1) Smart contract bugs (we audit everything), (2) Market volatility (crypto can crash), (3) Protocol failures (we diversify across 5+ protocols), (4) Impermanent loss in LP strategies. Never invest more than you can afford to lose. Conservative tier is lowest risk."
+    },
+    {
+      q: "When can I withdraw my funds?",
+      a: "Deposits can be withdrawn at any time with no lock-up period. However, we recommend staying invested at least 6-12 months to capture full yield potential and reduce gas fee impact."
+    },
+    {
+      q: "How do you generate 15-20% returns?",
+      a: "Through multi-protocol yield optimization: Kamino lending (12% on USDC), Jito SOL staking (9.5%), Meteora LP pools (15-20%), MarginFi leveraged positions (18-25%), and active rebalancing. We use strategies most retail investors can't access or don't understand."
+    },
+    {
+      q: "Do I need to hold $BASED to use the fund?",
+      a: "No - the Conservative tier is available to everyone with no $BASED required. However, holding $BASED unlocks: (1) Aggressive strategies (10K tokens), (2) Life Changing strategies (50K tokens), (3) Lower fees, (4) Revenue sharing from protocol."
+    },
+    {
+      q: "When does $BASED launch?",
+      a: "December 3rd, 2025 on Pump.fun. The full fund with all strategies launches Q1 2026 after smart contract audits and testing."
+    },
+    {
+      q: "Is this regulated? Are you registered?",
+      a: "We are establishing proper legal structure for fund operations. For accredited investors and larger amounts, we will have appropriate documentation. For smaller retail amounts, users interact directly with smart contracts. Always consult your own legal/tax advisor."
+    },
+    {
+      q: "What blockchain is this on?",
+      a: "Initially Solana for low fees and fast transactions. Phase 2 expands to Ethereum, Base, and Arbitrum for multi-chain yield opportunities."
+    },
+    {
+      q: "How can I track my returns?",
+      a: "Live dashboard at usbased.xyz/dashboard shows real-time balances, APY, and performance. Monthly reports sent to all fund participants. Everything is transparent on-chain."
+    },
+    {
+      q: "What makes you different from Lido/Rocket Pool?",
+      a: "They're single-asset staking protocols (just ETH). We're a multi-asset fund with active management. They offer 4-6% returns. We target 15-20%. They have no token utility beyond governance. $BASED unlocks strategies, shares revenue, and gets burned."
+    },
+    {
+      q: "Can I lose money?",
+      a: "Yes. Crypto is volatile. Even with 15% APY, if the assets drop 30%, you're still down 15% net. Life Changing tier can lose 50%+ in bear markets. Only invest what you can afford to lose. Conservative tier in stablecoins has lowest risk."
+    },
+    {
+      q: "Who runs this?",
+      a: "Sirmark - 13+ years building successful businesses, trained 500+ clients, built 3 fitness companies. Now applying that discipline to DeFi. Christian values, full transparency, no BS."
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex gap-8 items-center">
-            <Link href="/">
-              <h1 className="text-2xl font-bold text-blue-600 cursor-pointer">BASED Reserve</h1>
-            </Link>
-            <Link href="/how-it-works" className="text-sm font-medium text-gray-600 hover:text-blue-600">How It Works</Link>
-            <Link href="/tokenomics" className="text-sm font-medium text-gray-600 hover:text-blue-600">Tokenomics</Link>
-            <Link href="/growth" className="text-sm font-medium text-gray-600 hover:text-blue-600">Growth Strategy</Link>
-            <Link href="/about-based" className="text-sm font-medium text-gray-600 hover:text-blue-600">About $BSOL</Link>
-            <Link href="/faq" className="text-sm font-medium text-blue-600">FAQ</Link>
-          </div>
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold text-white">← BASED Protocol</Link>
           <WalletButton />
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
-        <h1 className="text-5xl font-bold mb-4 text-gray-900">Frequently Asked Questions</h1>
-        <p className="text-xl text-gray-600 mb-12">Everything you need to know about BASED Reserve</p>
-
-        <div className="space-y-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">What is BASED Reserve?</h2>
-            <p className="text-gray-700">
-              BASED Reserve is a decentralized staking platform built on Solana blockchain. Stake SOL or $BSOL tokens 
-              to earn competitive yields up to 85% APY through our tiered account system. The longer you stake, the higher 
-              your tier and multiplier grows.
-            </p>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">Why Choose BASED Reserve Over Traditional Crypto Banks?</h2>
-            <p className="text-gray-700 mb-4">
-              In April 2025, U.S. regulators approved traditional banks to custody crypto. This created two paths:
-            </p>
-            <div className="space-y-4">
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r">
-                <p className="font-bold text-gray-900 mb-2">Traditional Crypto Banks (like USCR)</p>
-                <p className="text-gray-700 text-sm">Lower yields (1-4% APY), regulated custody, insured deposits, lower risk</p>
-              </div>
-              <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded-r">
-                <p className="font-bold text-gray-900 mb-2">BASED Reserve (Aggressive DeFi Staking)</p>
-                <p className="text-gray-700 text-sm">Higher yields (8.5-85% APY), self-custody, uninsured, higher risk but bigger returns</p>
-              </div>
-            </div>
-            <p className="text-gray-700 mt-4">
-              <strong>We're similar to USCR in concept—both offer crypto banking services.</strong> The difference? We offer 
-              significantly higher returns in exchange for taking on more risk. If you want safety and insurance, use traditional 
-              crypto banks. If you want maximum yields and accept smart contract risk, stake with us.
-            </p>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">SOL vs $BSOL Staking - Which Should I Choose?</h2>
-            <div className="space-y-4">
-              <div className="border-l-4 border-blue-500 pl-4">
-                <p className="font-bold text-gray-900 mb-2">SOL Staking (Conservative)</p>
-                <ul className="text-gray-700 text-sm space-y-1">
-                  <li>• Base APY: 8.5% (up to 85% with tier multipliers)</li>
-                  <li>• Lower risk - staking the native Solana token</li>
-                  <li>• Rewards paid in SOL</li>
-                  <li>• Good for: Long-term holders, risk-averse stakers</li>
-                </ul>
-              </div>
-              <div className="border-l-4 border-purple-500 pl-4">
-                <p className="font-bold text-gray-900 mb-2">$BSOL Staking (Aggressive)</p>
-                <ul className="text-gray-700 text-sm space-y-1">
-                  <li>• Base APY: 50-100% (varies based on protocol revenue)</li>
-                  <li>• Higher risk - protocol token with market volatility</li>
-                  <li>• Rewards paid in $BSOL</li>
-                  <li>• Good for: Risk-seeking yield farmers, protocol believers</li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded p-4">
-              <p className="text-sm text-gray-700">
-                <strong>Risk Warning:</strong> $BSOL staking offers higher rewards but comes with token price volatility. 
-                SOL staking is more conservative. Choose based on your risk tolerance.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">How do I earn interest?</h2>
-            <p className="text-gray-700 mb-4">
-              Both SOL and $BSOL staking use the same tier system. Your account tier increases based on how long you stake:
-            </p>
-            <div className="space-y-2 text-gray-700">
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Basic Account (Week 0-4)</span>
-                <span className="font-semibold">1.0X multiplier</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Growth Account (Week 5-9)</span>
-                <span className="font-semibold">1.5X multiplier</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Premium Account (Week 10-19)</span>
-                <span className="font-semibold">2.0X multiplier</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Elite Reserve (Week 20-49)</span>
-                <span className="font-semibold">3.0X multiplier</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Platinum Reserve (Week 50-99)</span>
-                <span className="font-semibold">5.0X multiplier</span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span>Chairman's Circle (Week 100+)</span>
-                <span className="font-semibold text-blue-600">10X multiplier</span>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mt-4">
-              For SOL staking: 8.5% base × your multiplier. For $BSOL staking: 50-100% base × your multiplier.
-            </p>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">Can I withdraw early?</h2>
-            <p className="text-gray-700 mb-4">
-              Yes, you maintain full control. However, early withdrawals incur fees to ensure platform stability:
-            </p>
-            <div className="space-y-2 text-gray-700">
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Week 1-4</span>
-                <span className="text-red-600 font-semibold">25% fee</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Month 1-3</span>
-                <span className="text-orange-600 font-semibold">15% fee</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Month 3-6</span>
-                <span className="text-yellow-600 font-semibold">10% fee</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span>Month 6-12</span>
-                <span className="text-blue-600 font-semibold">5% fee</span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span>Year 1+</span>
-                <span className="text-green-600 font-semibold">0% fee</span>
-              </div>
-            </div>
-            <p className="text-gray-600 text-sm mt-4">
-              All withdrawal fees are redistributed to remaining stakers through the reward pool.
-            </p>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">Is my crypto secure?</h2>
-            <p className="text-gray-700 mb-4">Your assets are secured through multiple layers:</p>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span><strong>Security Audit:</strong> 9/10 score with all critical issues resolved</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span><strong>Self-Custody:</strong> You keep your private keys at all times</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span><strong>Blockchain Transparency:</strong> All transactions publicly verifiable on Solana</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span><strong>Immutable Code:</strong> Smart contract cannot be modified after deployment</span>
-              </li>
-            </ul>
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded p-4">
-              <p className="text-sm text-gray-700">
-                <strong>Important:</strong> Unlike traditional banks, we are NOT FDIC insured. Your deposits are secured by 
-                smart contracts, not government insurance. Higher risk = higher reward.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">When is mainnet launch?</h2>
-            <p className="text-gray-700">
-              We're currently testing on Solana devnet. Mainnet launch is scheduled for <strong>November 18, 2025</strong>. 
-              First 100 stakers receive a permanent 2X Founders Bonus on all rewards.
-            </p>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-3 text-gray-900">How do I get started?</h2>
-            <div className="space-y-4 text-gray-700">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
-                <div>
-                  <p className="font-semibold text-gray-900">Install a Solana wallet</p>
-                  <p className="text-sm text-gray-600">Phantom recommended for beginners</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
-                <div>
-                  <p className="font-semibold text-gray-900">Connect your wallet</p>
-                  <p className="text-sm text-gray-600">Click "Connect Wallet" in the navigation</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
-                <div>
-                  <p className="font-semibold text-gray-900">Choose SOL or $BSOL staking</p>
-                  <p className="text-sm text-gray-600">Pick conservative (SOL) or aggressive ($BSOL) based on risk tolerance</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
-                <div>
-                  <p className="font-semibold text-gray-900">Start earning</p>
-                  <p className="text-sm text-gray-600">Your rewards compound automatically as your tier increases</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-4xl mx-auto px-8 py-20">
+        <div className="text-center mb-16">
+          <h1 className="text-6xl font-black text-white mb-6">
+            Frequently Asked Questions
+          </h1>
+          <p className="text-2xl text-gray-300">
+            Everything you need to know about BASED Protocol
+          </p>
         </div>
 
-        <div className="mt-12 text-center">
-          <Link href="/">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold">
-              Get Started
-            </button>
-          </Link>
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div 
+              key={index}
+              className="bg-white/5 border-2 border-white/20 rounded-2xl overflow-hidden backdrop-blur-sm hover:border-blue-500 transition-all"
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full px-8 py-6 text-left flex justify-between items-center"
+              >
+                <h3 className="text-xl font-bold text-white pr-8">{faq.q}</h3>
+                <span className="text-3xl text-blue-400">
+                  {openIndex === index ? '−' : '+'}
+                </span>
+              </button>
+              {openIndex === index && (
+                <div className="px-8 pb-6">
+                  <p className="text-lg text-gray-300 leading-relaxed">{faq.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+
+        <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-center">
+          <h2 className="text-4xl font-black text-white mb-4">
+            Still Have Questions?
+          </h2>
+          <p className="text-xl text-white mb-8">
+            Join our Telegram and ask the community
+          </p>
+          <a 
+            href="https://t.me/staybasedpro"
+            target="_blank"
+            className="inline-block bg-white text-blue-600 font-bold text-xl px-12 py-5 rounded-xl hover:bg-gray-100 transition-all"
+          >
+            Join Telegram →
+          </a>
+        </div>
+      </div>
+    </main>
   );
 }
