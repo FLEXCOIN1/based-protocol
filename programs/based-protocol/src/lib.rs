@@ -40,6 +40,7 @@ pub mod based_protocol {
         ctx.accounts.user_stake.stake_account = ctx.accounts.stake_account.key();
         ctx.accounts.user_stake.rewards_earned = 0;
         ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
+        ctx.accounts.user_stake.asset_type = AssetType::SOL;
 
         ctx.accounts.state.total_staked += amount;
         ctx.accounts.state.total_users += 1;
@@ -50,7 +51,6 @@ pub mod based_protocol {
     pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
         require!(ctx.accounts.user_stake.amount >= amount, ErrorCode::InsufficientStake);
         
-        // Transfer from vault (PDA) back to user using invoke_signed
         let vault_bump = ctx.bumps.vault;
         let vault_seeds = &[b"vault".as_ref(), &[vault_bump]];
         let signer_seeds = &[&vault_seeds[..]];
@@ -76,6 +76,35 @@ pub mod based_protocol {
         
         Ok(())
     }
+
+    // NEW: Stake USDC
+    pub fn stake_usdc(
+        ctx: Context<StakeToken>,
+        amount: u64,
+    ) -> Result<()> {
+        // Token transfer logic here (simplified for now)
+        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
+        ctx.accounts.user_stake.amount = amount;
+        ctx.accounts.user_stake.rewards_earned = 0;
+        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
+        ctx.accounts.user_stake.asset_type = AssetType::USDC;
+
+        Ok(())
+    }
+
+    // NEW: Stake mSOL (Marinade staked SOL)
+    pub fn stake_msol(
+        ctx: Context<StakeToken>,
+        amount: u64,
+    ) -> Result<()> {
+        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
+        ctx.accounts.user_stake.amount = amount;
+        ctx.accounts.user_stake.rewards_earned = 0;
+        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
+        ctx.accounts.user_stake.asset_type = AssetType::MSOL;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -91,7 +120,7 @@ pub struct Initialize<'info> {
 pub struct CreateStakeAccount<'info> {
     #[account(mut, seeds = [b"state"], bump)]
     pub state: Account<'info, ProtocolState>,
-    #[account(init_if_needed, payer = user, space = 8 + 88, seeds = [b"user_stake", user.key().as_ref()], bump)]
+    #[account(init_if_needed, payer = user, space = 8 + 96, seeds = [b"user_stake", user.key().as_ref()], bump)]
     pub user_stake: Account<'info, UserStake>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -128,6 +157,15 @@ pub struct Unstake<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct StakeToken<'info> {
+    #[account(init_if_needed, payer = user, space = 8 + 96, seeds = [b"user_stake", user.key().as_ref()], bump)]
+    pub user_stake: Account<'info, UserStake>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct ProtocolState {
     pub total_staked: u64,
@@ -144,6 +182,16 @@ pub struct UserStake {
     pub stake_account: Pubkey,
     pub rewards_earned: u64,
     pub last_stake_time: i64,
+    pub asset_type: AssetType,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+pub enum AssetType {
+    SOL,
+    USDC,
+    MSOL,
+    ETH,
+    BTC,
 }
 
 #[error_code]
