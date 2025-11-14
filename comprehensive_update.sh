@@ -1,3 +1,141 @@
+#!/bin/bash
+
+# 1. GLOBALS.CSS - Light Banking Theme
+cat > app/globals.css << 'EOF'
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-all shadow-sm hover:shadow-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-blue-600 font-semibold py-3 px-8 rounded-lg border-2 border-blue-600 transition-all;
+  }
+  
+  .card {
+    @apply bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow;
+  }
+}
+EOF
+
+# 2. NAVIGATION COMPONENT
+cat > components/Navigation.tsx << 'EOF'
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
+  { ssr: false }
+);
+
+export default function Navigation() {
+  const pathname = usePathname();
+  
+  const isActive = (path: string) => pathname === path;
+  
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-8 items-center">
+            <Link href="/" className="text-2xl font-bold text-blue-600">
+              BASED Protocol
+            </Link>
+            <Link 
+              href="/how-it-works" 
+              className={isActive('/how-it-works') ? 'text-sm font-medium text-blue-600' : 'text-sm font-medium text-gray-600 hover:text-blue-600'}
+            >
+              How It Works
+            </Link>
+            <Link 
+              href="/stake" 
+              className={isActive('/stake') ? 'text-sm font-medium text-blue-600' : 'text-sm font-medium text-gray-600 hover:text-blue-600'}
+            >
+              Stake
+            </Link>
+            <Link 
+              href="/tokenomics" 
+              className={isActive('/tokenomics') ? 'text-sm font-medium text-blue-600' : 'text-sm font-medium text-gray-600 hover:text-blue-600'}
+            >
+              Roadmap
+            </Link>
+            <Link 
+              href="/faq" 
+              className={isActive('/faq') ? 'text-sm font-medium text-blue-600' : 'text-sm font-medium text-gray-600 hover:text-blue-600'}
+            >
+              FAQ
+            </Link>
+          </div>
+          <WalletMultiButton className="!bg-blue-600 hover:!bg-blue-700 !rounded-lg" />
+        </div>
+      </div>
+    </nav>
+  );
+}
+EOF
+
+# 3. LAYOUT WITH FOOTER DISCLAIMER
+cat > app/layout.tsx << 'EOF'
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { WalletContextProvider } from "@/components/WalletProvider";
+import Navigation from "@/components/Navigation";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "BASED Protocol - Professional DeFi Fund on Solana",
+  description: "Institutional-grade yield strategies delivering 10-100%+ APY",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <WalletContextProvider>
+          <Navigation />
+          {children}
+          <footer className="bg-white border-t border-gray-200 py-6 mt-20">
+            <div className="max-w-7xl mx-auto px-6 text-center">
+              <p className="text-xs text-gray-500 mb-2">
+                High-risk investment. Cryptocurrency is volatile and may result in total loss. Not FDIC insured. Don't invest what you can't afford to lose. Past performance doesn't guarantee future results.
+              </p>
+              <p className="text-xs text-gray-400">© 2025 BASED Protocol. Founded by Sirmark Critney, Developer & Crypto Fund Manager.</p>
+            </div>
+          </footer>
+        </WalletContextProvider>
+      </body>
+    </html>
+  );
+}
+EOF
+
+# 4. HOMEPAGE
+cat > app/page.tsx << 'EOF'
 import Link from 'next/link';
 
 export default function Home() {
@@ -122,3 +260,7 @@ export default function Home() {
     </div>
   );
 }
+EOF
+
+echo "✅ Updated: Homepage, Layout, Navigation, Globals"
+echo "Next: Run this script with bash comprehensive_update.sh"

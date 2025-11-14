@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cat > app/faq/page.tsx << 'EOF'
 export default function FAQ() {
   const faqs = [
     {
@@ -62,3 +65,6 @@ export default function FAQ() {
     </div>
   );
 }
+EOF
+
+echo "✅ Updated: FAQ"

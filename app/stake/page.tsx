@@ -1,149 +1,187 @@
 'use client';
-
-import Link from 'next/link';
-import WalletButton from '../../components/WalletButton';
+import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+
+const TIERS = {
+  conservative: {
+    name: 'Conservative',
+    apy: '10-12%',
+    basedRequired: 0,
+    strategies: [
+      { name: 'Kamino USDC Lending', value: 60, color: '#3b82f6' },
+      { name: 'Solend Stable Pools', value: 30, color: '#60a5fa' },
+      { name: 'Reserve Fund', value: 10, color: '#93c5fd' },
+    ]
+  },
+  aggressive: {
+    name: 'Aggressive',
+    apy: '15-20%',
+    basedRequired: 10000,
+    strategies: [
+      { name: 'Kamino Lending', value: 30, color: '#3b82f6' },
+      { name: 'Jito Liquid Staking', value: 25, color: '#60a5fa' },
+      { name: 'Meteora LP Pools', value: 25, color: '#93c5fd' },
+      { name: 'Marinade mSOL', value: 15, color: '#bfdbfe' },
+      { name: 'Reserve Fund', value: 5, color: '#dbeafe' },
+    ]
+  },
+  lifeChanging: {
+    name: 'Life Changing',
+    apy: '30-100%+',
+    basedRequired: 50000,
+    strategies: [
+      { name: 'High-Yield LP Pools', value: 35, color: '#8b5cf6' },
+      { name: 'Leveraged Strategies', value: 30, color: '#a78bfa' },
+      { name: 'New Protocol Farming', value: 20, color: '#c4b5fd' },
+      { name: 'Conservative Base', value: 10, color: '#ddd6fe' },
+      { name: 'Reserve Fund', value: 5, color: '#ede9fe' },
+    ]
+  }
+};
 
 export default function Stake() {
-  const wallet = useWallet();
+  const { connected } = useWallet();
+  const [selectedTier, setSelectedTier] = useState<'conservative' | 'aggressive' | 'lifeChanging'>('conservative');
+  const [amount, setAmount] = useState('');
+
+  const tier = TIERS[selectedTier];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-white">← BASED Protocol</Link>
-          <WalletButton />
-        </div>
-      </nav>
+    <div className="min-h-screen py-20">
+      <div className="max-w-7xl mx-auto px-6">
+        <h1 className="text-5xl font-bold text-center mb-6">Stake Your Capital</h1>
+        <p className="text-xl text-gray-600 text-center mb-12">
+          All tiers stake into ONE Solana-based protocol. Choose your strategy, deposit USDC, earn yield.
+        </p>
 
-      <div className="max-w-5xl mx-auto px-8 py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-black text-white mb-6">
-            Stake $BASED
-          </h1>
-          <p className="text-2xl text-gray-300">
-            Earn revenue share from ALL protocol fees
-          </p>
-        </div>
-
-        {/* Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-gradient-to-br from-blue-900/50 to-blue-700/30 border-2 border-blue-500 rounded-3xl p-8 text-center">
-            <div className="text-6xl mb-4">🔓</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Unlock Tiers</h3>
-            <p className="text-gray-300">
-              10K = Aggressive tier
-              <br />
-              50K = Life Changing tier
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-900/50 to-purple-700/30 border-2 border-purple-500 rounded-3xl p-8 text-center">
-            <div className="text-6xl mb-4">💰</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Earn Revenue</h3>
-            <p className="text-gray-300">
-              Get 25% of all protocol fees distributed proportionally
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-pink-900/50 to-pink-700/30 border-2 border-pink-500 rounded-3xl p-8 text-center">
-            <div className="text-6xl mb-4">💎</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Benefit from Burns</h3>
-            <p className="text-gray-300">
-              Your stake becomes worth more as supply decreases
-            </p>
-          </div>
-        </div>
-
-        {/* Staking Interface */}
-        <div className="bg-white/5 border-2 border-white/20 rounded-3xl p-12 backdrop-blur-sm">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">
-            Staking Interface
-          </h2>
-
-          <div className="bg-yellow-500/20 border-2 border-yellow-500 rounded-2xl p-8 text-center mb-8">
-            <p className="text-yellow-300 text-xl font-bold">
-              🚧 Staking goes live December 3rd, 2025
-            </p>
-            <p className="text-yellow-200 mt-2">
-              Get your $BASED ready for launch day
-            </p>
-          </div>
-
-          {!wallet.connected ? (
-            <div className="text-center">
-              <p className="text-gray-300 text-xl mb-8">
-                Connect your wallet to stake $BASED
-              </p>
-              <WalletButton />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="bg-black/40 rounded-2xl p-8">
-                <p className="text-gray-400 mb-2">Your $BASED Balance</p>
-                <p className="text-4xl font-bold text-white">Coming Soon</p>
-              </div>
-
-              <div className="bg-black/40 rounded-2xl p-8">
-                <p className="text-gray-400 mb-2">Currently Staked</p>
-                <p className="text-4xl font-bold text-white">Coming Soon</p>
-              </div>
-
-              <div className="bg-black/40 rounded-2xl p-8">
-                <p className="text-gray-400 mb-2">Unclaimed Rewards</p>
-                <p className="text-4xl font-bold text-white">Coming Soon</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 mt-8">
-                <button 
-                  disabled
-                  className="bg-blue-500 opacity-50 cursor-not-allowed text-white font-bold text-xl px-12 py-5 rounded-xl"
-                >
-                  Stake $BASED
-                </button>
-                <button 
-                  disabled
-                  className="bg-purple-500 opacity-50 cursor-not-allowed text-white font-bold text-xl px-12 py-5 rounded-xl"
-                >
-                  Claim Rewards
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* APY Calculator */}
-        <div className="mt-16 bg-gradient-to-br from-green-900/50 to-blue-900/50 border-2 border-green-500 rounded-3xl p-12">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">
-            Staking Rewards Calculator
-          </h2>
-          
-          <div className="bg-black/40 rounded-2xl p-8 text-center">
-            <p className="text-gray-300 text-lg mb-4">
-              Example: If protocol generates $100K in annual fees
-            </p>
-            <div className="space-y-4">
-              <div className="bg-black/40 rounded-xl p-6">
-                <p className="text-white font-semibold mb-2">25% to stakers = $25,000</p>
-                <p className="text-gray-400">If you stake 10K tokens (1% of staked supply)</p>
-                <p className="text-green-400 text-2xl font-bold mt-2">You earn ~$250/year</p>
-              </div>
-              <p className="text-yellow-300 text-sm">
-                Actual returns depend on total staked amount and protocol revenue
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-16 text-center">
-          <Link 
-            href="/tokenomics"
-            className="inline-block bg-white text-blue-600 font-bold text-xl px-12 py-5 rounded-xl hover:bg-gray-100 transition-all"
+        {/* Tier Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <button
+            onClick={() => setSelectedTier('conservative')}
+            className={`card text-left transition-all ${
+              selectedTier === 'conservative' ? 'border-2 border-blue-600 shadow-lg' : 'border border-gray-200'
+            }`}
           >
-            Learn More About Tokenomics →
-          </Link>
+            <h3 className="text-2xl font-bold mb-2">Conservative</h3>
+            <div className="text-3xl font-bold text-blue-600 mb-2">{TIERS.conservative.apy}</div>
+            <p className="text-gray-600 text-sm">Free entry - no $BASED required</p>
+          </button>
+
+          <button
+            onClick={() => setSelectedTier('aggressive')}
+            className={`card text-left transition-all ${
+              selectedTier === 'aggressive' ? 'border-2 border-blue-600 shadow-lg' : 'border border-gray-200'
+            }`}
+          >
+            <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">POPULAR</div>
+            <h3 className="text-2xl font-bold mb-2">Aggressive</h3>
+            <div className="text-3xl font-bold text-blue-600 mb-2">{TIERS.aggressive.apy}</div>
+            <p className="text-gray-600 text-sm">10K $BASED required</p>
+          </button>
+
+          <button
+            onClick={() => setSelectedTier('lifeChanging')}
+            className={`card text-left transition-all ${
+              selectedTier === 'lifeChanging' ? 'border-2 border-purple-600 shadow-lg' : 'border border-gray-200'
+            }`}
+          >
+            <h3 className="text-2xl font-bold mb-2">Life Changing</h3>
+            <div className="text-3xl font-bold text-purple-600 mb-2">{TIERS.lifeChanging.apy}</div>
+            <p className="text-gray-600 text-sm">50K $BASED required</p>
+          </button>
+        </div>
+
+        {/* Selected Tier Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Pie Chart */}
+          <div className="card">
+            <h3 className="text-2xl font-bold mb-6">{tier.name} - Fund Allocation</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={tier.strategies}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ value }) => `${value}%`}
+                  outerRadius={100}
+                  dataKey="value"
+                >
+                  {tier.strategies.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-6 space-y-2">
+              {tier.strategies.map((strategy, idx) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span className="text-gray-700">{strategy.name}</span>
+                  <span className="font-semibold text-gray-900">{strategy.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Deposit Interface */}
+          <div className="card">
+            <h3 className="text-2xl font-bold mb-6">Deposit USDC</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amount (USDC)</label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={!connected}
+                />
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Target APY</span>
+                  <span className="font-bold text-blue-600">{tier.apy}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">$BASED Required</span>
+                  <span className="font-bold">{tier.basedRequired === 0 ? 'None' : tier.basedRequired.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {tier.basedRequired > 0 && (
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-bold text-blue-600">Auto-unlock:</span> Protocol automatically buys {tier.basedRequired.toLocaleString()} $BASED for you. No manual swapping.
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={() => alert('Contract integration coming January 2026. Token launches Dec 3rd!')}
+                disabled={!connected || !amount}
+                className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {!connected ? 'Connect Wallet First' : 'Deposit & Earn'}
+              </button>
+
+              <p className="text-xs text-gray-500 text-center">
+                Coming January 2026. $BASED launches December 3rd on Pump.fun.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

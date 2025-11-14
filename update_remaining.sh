@@ -1,3 +1,7 @@
+#!/bin/bash
+
+# HOW IT WORKS - Value Creation
+cat > app/how-it-works/page.tsx << 'EOF'
 export default function HowItWorks() {
   return (
     <div className="min-h-screen py-20">
@@ -107,3 +111,6 @@ export default function HowItWorks() {
     </div>
   );
 }
+EOF
+
+echo "✅ Updated: How It Works"
