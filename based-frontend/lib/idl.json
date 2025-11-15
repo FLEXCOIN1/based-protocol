@@ -8,26 +8,161 @@
   },
   "instructions": [
     {
-      "name": "initialize",
+      "name": "deposit",
       "discriminator": [
-        175,
-        175,
-        109,
-        31,
-        13,
-        152,
-        155,
-        237
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
       ],
       "accounts": [
         {
-          "name": "state",
+          "name": "protocol_state",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user_token",
+          "writable": true
+        },
+        {
+          "name": "user_based_balance"
+        },
+        {
+          "name": "protocol_fee_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  102,
+                  101,
+                  101,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "strategy_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "tier",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initialize_protocol",
+      "discriminator": [
+        188,
+        233,
+        252,
+        106,
+        134,
+        146,
+        202,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "protocol_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
                   115,
                   116,
                   97,
@@ -51,207 +186,34 @@
       "args": []
     },
     {
-      "name": "stake_sol",
+      "name": "withdraw_fees",
       "discriminator": [
-        200,
-        38,
-        157,
-        155,
-        245,
-        57,
-        236,
-        168
-      ],
-      "accounts": [
-        {
-          "name": "state",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  116,
-                  97,
-                  116,
-                  101
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "user_stake",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  107,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "stake_usdc",
-      "discriminator": [
-        251,
-        129,
-        45,
-        51,
-        186,
+        198,
+        212,
+        171,
+        109,
+        144,
         215,
-        88,
-        181
+        174,
+        89
       ],
       "accounts": [
         {
-          "name": "user_stake",
-          "writable": true,
+          "name": "protocol_state",
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  117,
-                  115,
-                  101,
+                  112,
                   114,
-                  95,
-                  115,
+                  111,
                   116,
-                  97,
-                  107,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "user_usdc",
-          "writable": true
-        },
-        {
-          "name": "vault_usdc",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
+                  111,
+                  99,
+                  111,
                   108,
-                  116,
                   95,
-                  117,
-                  115,
-                  100,
-                  99
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "unstake_sol",
-      "discriminator": [
-        70,
-        150,
-        140,
-        208,
-        166,
-        13,
-        252,
-        150
-      ],
-      "accounts": [
-        {
-          "name": "state",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
                   115,
                   116,
                   97,
@@ -263,45 +225,31 @@
           }
         },
         {
-          "name": "user_stake",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  107,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
+          "name": "authority",
           "writable": true,
           "signer": true
         },
         {
-          "name": "vault",
+          "name": "protocol_fee_vault",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  102,
+                  101,
+                  101,
+                  95,
                   118,
                   97,
                   117,
@@ -313,88 +261,8 @@
           }
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "unstake_usdc",
-      "discriminator": [
-        25,
-        19,
-        219,
-        118,
-        105,
-        104,
-        6,
-        87
-      ],
-      "accounts": [
-        {
-          "name": "user_stake",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114,
-                  95,
-                  115,
-                  116,
-                  97,
-                  107,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "user_usdc",
+          "name": "destination",
           "writable": true
-        },
-        {
-          "name": "vault_usdc",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116,
-                  95,
-                  117,
-                  115,
-                  100,
-                  99
-                ]
-              }
-            ]
-          }
         },
         {
           "name": "token_program",
@@ -422,26 +290,23 @@
         195,
         248
       ]
-    },
-    {
-      "name": "UserStake",
-      "discriminator": [
-        102,
-        53,
-        163,
-        107,
-        9,
-        138,
-        87,
-        153
-      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "InsufficientStake",
-      "msg": "Insufficient stake amount"
+      "name": "InvalidTier",
+      "msg": "Invalid tier"
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientBasedHoldings",
+      "msg": "Insufficient $BASED holdings for this tier"
+    },
+    {
+      "code": 6002,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
     }
   ],
   "types": [
@@ -451,52 +316,20 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "total_staked",
-            "type": "u64"
-          },
-          {
-            "name": "total_rewards",
-            "type": "u64"
-          },
-          {
-            "name": "total_users",
-            "type": "u64"
-          },
-          {
             "name": "authority",
             "type": "pubkey"
           },
           {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UserStake",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "owner",
-            "type": "pubkey"
-          },
-          {
-            "name": "sol_amount",
+            "name": "total_deposits",
             "type": "u64"
           },
           {
-            "name": "usdc_amount",
+            "name": "total_fees_collected",
             "type": "u64"
           },
           {
-            "name": "rewards_earned",
+            "name": "total_based_burned",
             "type": "u64"
-          },
-          {
-            "name": "last_stake_time",
-            "type": "i64"
           }
         ]
       }

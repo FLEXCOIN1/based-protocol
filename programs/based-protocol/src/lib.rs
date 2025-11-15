@@ -1,215 +1,375 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::system_instruction;
-use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+use anchor_spl::token::{self, Token, TokenAccount, Transfer, Mint};
 
 declare_id!("4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd");
 
-// USDC devnet: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
-const USDC_MINT: &str = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+const CONSERVATIVE_FEE_BPS: u64 = 10;    // 0.1%
+const AGGRESSIVE_FEE_BPS: u64 = 5;       // 0.05%
+const LIFE_CHANGING_FEE_BPS: u64 = 0;    // 0%
+
+// Additional fee for tier unlock (buys $BASED for user)
+const AGGRESSIVE_UNLOCK_FEE_BPS: u64 = 100;      // 1% extra to buy 10K $BASED
+const LIFE_CHANGING_UNLOCK_FEE_BPS: u64 = 200;   // 2% extra to buy 50K $BASED
+
+const AGGRESSIVE_MIN_BASED: u64 = 10_000_000_000_000;    // 10K tokens
+const LIFE_CHANGING_MIN_BASED: u64 = 50_000_000_000_000; // 50K tokens
 
 #[program]
 pub mod based_protocol {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        ctx.accounts.state.total_staked = 0;
-        ctx.accounts.state.total_rewards = 0;
-        ctx.accounts.state.total_users = 0;
-        ctx.accounts.state.authority = ctx.accounts.authority.key();
-        ctx.accounts.state.bump = ctx.bumps.state;
+    pub fn initialize(
+        ctx: Context<Initialize>,
+        usdc_mint: Pubkey,
+        based_mint: Pubkey,
+    ) -> Result<()> {
+        let state = &mut ctx.accounts.protocol_state;
+        state.authority = ctx.accounts.authority.key();
+        state.usdc_mint = usdc_mint;
+        state.based_mint = based_mint;
+        state.total_deposits = 0;
+        state.total_fees = 0;
+        state.total_burned = 0;
+        state.total_based_bought = 0;
+        state.bump = ctx.bumps.protocol_state;
+        msg!("Protocol initialized");
         Ok(())
     }
 
-    // SOL STAKING
-    pub fn stake_sol(
-        ctx: Context<StakeSOL>,
+    /// Deposit with automatic tier unlock
+    /// User just deposits USDC, protocol handles $BASED
+    pub fn deposit(
+        ctx: Context<Deposit>,
         amount: u64,
+        desired_tier: u8,
     ) -> Result<()> {
-        let transfer_ix = system_instruction::transfer(
-            ctx.accounts.user.key,
-            ctx.accounts.vault.key,
-            amount,
-        );
+        require!(desired_tier <= 2, ErrorCode::InvalidTier);
 
-        anchor_lang::solana_program::program::invoke(
-            &transfer_ix,
-            &[
-                ctx.accounts.user.to_account_info(),
-                ctx.accounts.vault.to_account_info(),
-            ],
+        // Check if user already has tier unlocked via protocol-staked $BASED
+        let position = &mut ctx.accounts.user_position;
+        let current_protocol_stake = position.protocol_staked_based;
+
+        let needs_unlock = match desired_tier {
+            0 => false,
+            1 => current_protocol_stake < AGGRESSIVE_MIN_BASED,
+            2 => current_protocol_stake < LIFE_CHANGING_MIN_BASED,
+            _ => false,
+        };
+
+        // Calculate fees
+        let deposit_fee_bps = match desired_tier {
+            0 => CONSERVATIVE_FEE_BPS,
+            1 => AGGRESSIVE_FEE_BPS,
+            2 => LIFE_CHANGING_FEE_BPS,
+            _ => 0,
+        };
+
+        let mut total_fee_bps = deposit_fee_bps;
+
+        // Add unlock fee if needed
+        if needs_unlock {
+            let unlock_fee_bps = match desired_tier {
+                1 => AGGRESSIVE_UNLOCK_FEE_BPS,
+                2 => LIFE_CHANGING_UNLOCK_FEE_BPS,
+                _ => 0,
+            };
+            total_fee_bps = total_fee_bps.checked_add(unlock_fee_bps).unwrap();
+        }
+
+        let total_fee = amount.checked_mul(total_fee_bps).unwrap().checked_div(10000).unwrap();
+        let net_amount = amount.checked_sub(total_fee).unwrap();
+
+        // Transfer total fee to protocol
+        if total_fee > 0 {
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.user_token.to_account_info(),
+                        to: ctx.accounts.fee_vault.to_account_info(),
+                        authority: ctx.accounts.user.to_account_info(),
+                    },
+                ),
+                total_fee,
+            )?;
+        }
+
+        // Transfer net to strategy vault
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.user_token.to_account_info(),
+                    to: ctx.accounts.strategy_vault.to_account_info(),
+                    authority: ctx.accounts.user.to_account_info(),
+                },
+            ),
+            net_amount,
         )?;
 
-        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
-        ctx.accounts.user_stake.sol_amount = amount;
-        ctx.accounts.user_stake.usdc_amount = 0;
-        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
+        // Update position
+        position.user = ctx.accounts.user.key();
+        position.tier = desired_tier;
+        position.deposited = position.deposited.checked_add(net_amount).unwrap();
+        position.last_deposit_slot = Clock::get()?.slot;
 
-        ctx.accounts.state.total_staked += amount;
-        ctx.accounts.state.total_users += 1;
+        // If tier was unlocked, mark the required $BASED as staked
+        // (Protocol will buy and stake this off-chain via Jupiter)
+        if needs_unlock {
+            let required_based = match desired_tier {
+                1 => AGGRESSIVE_MIN_BASED,
+                2 => LIFE_CHANGING_MIN_BASED,
+                _ => 0,
+            };
+            position.protocol_staked_based = required_based;
+        }
 
+        // Update protocol state
+        let state = &mut ctx.accounts.protocol_state;
+        state.total_deposits = state.total_deposits.checked_add(net_amount).unwrap();
+        state.total_fees = state.total_fees.checked_add(total_fee).unwrap();
+
+        msg!(
+            "Deposited: {} | Fee: {} | Tier: {} | Unlock: {}", 
+            net_amount, 
+            total_fee, 
+            desired_tier,
+            needs_unlock
+        );
         Ok(())
     }
 
-    // USDC STAKING
-    pub fn stake_usdc(
-        ctx: Context<StakeUSDC>,
+    /// Manual stake (if user wants to hold $BASED themselves)
+    pub fn stake_based(
+        ctx: Context<StakeBased>,
         amount: u64,
     ) -> Result<()> {
-        // Transfer USDC from user to vault
-        let cpi_accounts = Transfer {
-            from: ctx.accounts.user_usdc.to_account_info(),
-            to: ctx.accounts.vault_usdc.to_account_info(),
-            authority: ctx.accounts.user.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        token::transfer(cpi_ctx, amount)?;
-
-        ctx.accounts.user_stake.owner = ctx.accounts.user.key();
-        ctx.accounts.user_stake.usdc_amount = amount;
-        ctx.accounts.user_stake.sol_amount = 0;
-        ctx.accounts.user_stake.last_stake_time = Clock::get()?.unix_timestamp;
-
-        Ok(())
-    }
-
-    // UNSTAKE SOL
-    pub fn unstake_sol(ctx: Context<UnstakeSOL>, amount: u64) -> Result<()> {
-        require!(ctx.accounts.user_stake.sol_amount >= amount, ErrorCode::InsufficientStake);
-        
-        let vault_bump = ctx.bumps.vault;
-        let vault_seeds = &[b"vault".as_ref(), &[vault_bump]];
-        let signer_seeds = &[&vault_seeds[..]];
-        
-        let transfer_ix = system_instruction::transfer(
-            ctx.accounts.vault.key,
-            ctx.accounts.user.key,
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.user_based_account.to_account_info(),
+                    to: ctx.accounts.staking_vault.to_account_info(),
+                    authority: ctx.accounts.user.to_account_info(),
+                },
+            ),
             amount,
-        );
-
-        anchor_lang::solana_program::program::invoke_signed(
-            &transfer_ix,
-            &[
-                ctx.accounts.vault.to_account_info(),
-                ctx.accounts.user.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-            ],
-            signer_seeds,
         )?;
-        
-        ctx.accounts.user_stake.sol_amount -= amount;
-        ctx.accounts.state.total_staked -= amount;
-        
+
+        let stake = &mut ctx.accounts.stake_account;
+        stake.user = ctx.accounts.user.key();
+        stake.user_staked_amount = stake.user_staked_amount.checked_add(amount).unwrap();
+        stake.last_stake_slot = Clock::get()?.slot;
+
+        msg!("User staked {} $BASED", amount);
         Ok(())
     }
 
-    // UNSTAKE USDC
-    pub fn unstake_usdc(ctx: Context<UnstakeUSDC>, amount: u64) -> Result<()> {
-        require!(ctx.accounts.user_stake.usdc_amount >= amount, ErrorCode::InsufficientStake);
-        
-        let vault_bump = ctx.bumps.vault_usdc;
-        let vault_seeds = &[b"vault_usdc".as_ref(), &[vault_bump]];
-        let signer_seeds = &[&vault_seeds[..]];
+    /// Unstake user-owned $BASED
+    pub fn unstake_based(
+        ctx: Context<UnstakeBased>,
+        amount: u64,
+    ) -> Result<()> {
+        let stake = &mut ctx.accounts.stake_account;
+        require!(stake.user_staked_amount >= amount, ErrorCode::InsufficientStake);
 
-        let cpi_accounts = Transfer {
-            from: ctx.accounts.vault_usdc.to_account_info(),
-            to: ctx.accounts.user_usdc.to_account_info(),
-            authority: ctx.accounts.vault_usdc.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-        token::transfer(cpi_ctx, amount)?;
-        
-        ctx.accounts.user_stake.usdc_amount -= amount;
-        
+        let seeds = &[
+            b"staking_vault",
+            ctx.accounts.protocol_state.based_mint.as_ref(),
+            &[ctx.bumps.staking_vault],
+        ];
+
+        token::transfer(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.staking_vault.to_account_info(),
+                    to: ctx.accounts.user_based_account.to_account_info(),
+                    authority: ctx.accounts.staking_vault.to_account_info(),
+                },
+                &[seeds],
+            ),
+            amount,
+        )?;
+
+        stake.user_staked_amount = stake.user_staked_amount.checked_sub(amount).unwrap();
+        msg!("User unstaked {} $BASED", amount);
         Ok(())
     }
 }
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = authority, space = 8 + 80, seeds = [b"state"], bump)]
-    pub state: Account<'info, ProtocolState>,
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + ProtocolState::INIT_SPACE,
+        seeds = [b"protocol_state"],
+        bump
+    )]
+    pub protocol_state: Account<'info, ProtocolState>,
+    
     #[account(mut)]
     pub authority: Signer<'info>,
+    
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct StakeSOL<'info> {
-    #[account(mut, seeds = [b"state"], bump)]
-    pub state: Account<'info, ProtocolState>,
-    #[account(init_if_needed, payer = user, space = 8 + 104, seeds = [b"user_stake", user.key().as_ref()], bump)]
-    pub user_stake: Account<'info, UserStake>,
-    #[account(mut)]
-    pub user: Signer<'info>,
-    /// CHECK: vault PDA
-    #[account(mut, seeds = [b"vault"], bump)]
-    pub vault: UncheckedAccount<'info>,
-    pub system_program: Program<'info, System>,
-}
+pub struct Deposit<'info> {
+    #[account(
+        mut,
+        seeds = [b"protocol_state"],
+        bump = protocol_state.bump
+    )]
+    pub protocol_state: Account<'info, ProtocolState>,
 
-#[derive(Accounts)]
-pub struct StakeUSDC<'info> {
-    #[account(init_if_needed, payer = user, space = 8 + 104, seeds = [b"user_stake", user.key().as_ref()], bump)]
-    pub user_stake: Account<'info, UserStake>,
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = 8 + UserPosition::INIT_SPACE,
+        seeds = [b"position", user.key().as_ref()],
+        bump
+    )]
+    pub user_position: Account<'info, UserPosition>,
+
     #[account(mut)]
     pub user: Signer<'info>,
+
     #[account(mut)]
-    pub user_usdc: Account<'info, TokenAccount>,
-    #[account(mut, seeds = [b"vault_usdc"], bump)]
-    pub vault_usdc: Account<'info, TokenAccount>,
+    pub user_token: Account<'info, TokenAccount>,
+
+    pub usdc_mint: Account<'info, Mint>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        seeds = [b"fee_vault", usdc_mint.key().as_ref()],
+        bump,
+        token::mint = usdc_mint,
+        token::authority = fee_vault,
+    )]
+    pub fee_vault: Account<'info, TokenAccount>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        seeds = [b"strategy_vault", usdc_mint.key().as_ref()],
+        bump,
+        token::mint = usdc_mint,
+        token::authority = strategy_vault,
+    )]
+    pub strategy_vault: Account<'info, TokenAccount>,
+
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct UnstakeSOL<'info> {
-    #[account(mut, seeds = [b"state"], bump)]
-    pub state: Account<'info, ProtocolState>,
-    #[account(mut, seeds = [b"user_stake", user.key().as_ref()], bump)]
-    pub user_stake: Account<'info, UserStake>,
+pub struct StakeBased<'info> {
+    #[account(
+        seeds = [b"protocol_state"],
+        bump = protocol_state.bump
+    )]
+    pub protocol_state: Account<'info, ProtocolState>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = 8 + StakeAccount::INIT_SPACE,
+        seeds = [b"stake", user.key().as_ref()],
+        bump
+    )]
+    pub stake_account: Account<'info, StakeAccount>,
+
     #[account(mut)]
     pub user: Signer<'info>,
-    /// CHECK: vault PDA
-    #[account(mut, seeds = [b"vault"], bump)]
-    pub vault: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub user_based_account: Account<'info, TokenAccount>,
+
+    pub based_mint: Account<'info, Mint>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        seeds = [b"staking_vault", based_mint.key().as_ref()],
+        bump,
+        token::mint = based_mint,
+        token::authority = staking_vault,
+    )]
+    pub staking_vault: Account<'info, TokenAccount>,
+
+    pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct UnstakeUSDC<'info> {
-    #[account(mut, seeds = [b"user_stake", user.key().as_ref()], bump)]
-    pub user_stake: Account<'info, UserStake>,
+pub struct UnstakeBased<'info> {
+    #[account(
+        seeds = [b"protocol_state"],
+        bump = protocol_state.bump
+    )]
+    pub protocol_state: Account<'info, ProtocolState>,
+
+    #[account(
+        mut,
+        seeds = [b"stake", user.key().as_ref()],
+        bump
+    )]
+    pub stake_account: Account<'info, StakeAccount>,
+
     #[account(mut)]
     pub user: Signer<'info>,
+
     #[account(mut)]
-    pub user_usdc: Account<'info, TokenAccount>,
-    #[account(mut, seeds = [b"vault_usdc"], bump)]
-    pub vault_usdc: Account<'info, TokenAccount>,
+    pub user_based_account: Account<'info, TokenAccount>,
+
+    #[account(
+        mut,
+        seeds = [b"staking_vault", protocol_state.based_mint.as_ref()],
+        bump
+    )]
+    pub staking_vault: Account<'info, TokenAccount>,
+
     pub token_program: Program<'info, Token>,
 }
 
 #[account]
+#[derive(InitSpace)]
 pub struct ProtocolState {
-    pub total_staked: u64,
-    pub total_rewards: u64,
-    pub total_users: u64,
     pub authority: Pubkey,
+    pub usdc_mint: Pubkey,
+    pub based_mint: Pubkey,
+    pub total_deposits: u64,
+    pub total_fees: u64,
+    pub total_burned: u64,
+    pub total_based_bought: u64,
     pub bump: u8,
 }
 
 #[account]
-pub struct UserStake {
-    pub owner: Pubkey,           // 32
-    pub sol_amount: u64,          // 8
-    pub usdc_amount: u64,         // 8
-    pub rewards_earned: u64,      // 8
-    pub last_stake_time: i64,     // 8
+#[derive(InitSpace)]
+pub struct UserPosition {
+    pub user: Pubkey,
+    pub tier: u8,
+    pub deposited: u64,
+    pub last_deposit_slot: u64,
+    pub protocol_staked_based: u64,  // $BASED staked by protocol for this user
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct StakeAccount {
+    pub user: Pubkey,
+    pub user_staked_amount: u64,  // User's own $BASED stake
+    pub last_stake_slot: u64,
 }
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Insufficient stake amount")]
+    #[msg("Invalid tier")]
+    InvalidTier,
+    #[msg("Insufficient staked amount")]
     InsufficientStake,
 }
