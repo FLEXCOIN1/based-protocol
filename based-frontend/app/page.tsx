@@ -2,121 +2,183 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      {/* Hero */}
-      <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-6xl font-bold mb-6 text-gray-900">
-            Professional DeFi Fund<br/>Built on Solana
+    <div className="min-h-screen bg-white">
+      {/* Hero - Coinbase style */}
+      <section className="pt-24 pb-32 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-6xl md:text-7xl font-semibold mb-6 text-gray-900 tracking-tight">
+            Earn up to 100%+ APY
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Institutional-grade yield strategies delivering 10-100%+ APY through automated protocols and $BASED token utility
+          <p className="text-2xl text-gray-600 mb-10 max-w-2xl mx-auto font-light">
+            Professional DeFi fund on Solana. Deposit USDC, earn institutional-grade yields.
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/stake" className="btn-primary text-lg">
-              Start Earning Now
+              Get started
             </Link>
             <Link href="/how-it-works" className="btn-secondary text-lg">
-              Learn How It Works
+              Learn more
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-16 bg-white border-y border-gray-200">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      {/* Stats - Clean spacing */}
+      <section className="py-20 bg-gray-50 border-y border-gray-200">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
             <div>
-              <div className="text-5xl font-bold text-blue-600 mb-2">10-100%+</div>
-              <div className="text-gray-600">Target APY Range</div>
+              <div className="text-5xl font-semibold text-gray-900 mb-3">10-100%+</div>
+              <div className="text-gray-600">Annual percentage yield</div>
             </div>
             <div>
-              <div className="text-5xl font-bold text-blue-600 mb-2">$BASED</div>
-              <div className="text-gray-600">Utility Token</div>
+              <div className="text-5xl font-semibold text-gray-900 mb-3">3 Tiers</div>
+              <div className="text-gray-600">Risk-matched strategies</div>
             </div>
             <div>
-              <div className="text-5xl font-bold text-blue-600 mb-2">3 Tiers</div>
-              <div className="text-gray-600">Risk-Matched Strategies</div>
+              <div className="text-5xl font-semibold text-gray-900 mb-3">$BASED</div>
+              <div className="text-gray-600">Utility token</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Three Tiers */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-4">Choose Your Strategy</h2>
-          <p className="text-xl text-gray-600 text-center mb-12">All tiers stake into ONE Solana-based protocol</p>
+      {/* Three Tiers - Minimal cards */}
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-semibold mb-4 text-gray-900">Choose your strategy</h2>
+            <p className="text-xl text-gray-600">Deposit USDC into one fund. We handle the rest.</p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card border-2 border-blue-200">
-              <h3 className="text-2xl font-bold mb-2 text-gray-900">Conservative</h3>
-              <div className="text-4xl font-bold text-blue-600 mb-4">10-12%</div>
-              <p className="text-gray-600 mb-4">Target APY</p>
-              <ul className="space-y-2 text-gray-700">
-                <li>✓ Free entry - no $BASED required</li>
-                <li>✓ Low-risk lending strategies</li>
-                <li>✓ 0.1% deposit fee</li>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Conservative */}
+            <div className="card">
+              <div className="mb-6">
+                <h3 className="text-2xl font-semibold mb-2 text-gray-900">Conservative</h3>
+                <div className="text-4xl font-semibold text-blue-600 mb-1">10-12%</div>
+                <div className="text-gray-500">APY target</div>
+              </div>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Free entry</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Low-risk lending</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Stable returns</span>
+                </li>
               </ul>
             </div>
 
-            <div className="card border-2 border-blue-600 shadow-lg">
-              <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">POPULAR</div>
-              <h3 className="text-2xl font-bold mb-2 text-gray-900">Aggressive</h3>
-              <div className="text-4xl font-bold text-blue-600 mb-4">15-20%</div>
-              <p className="text-gray-600 mb-4">Target APY</p>
-              <ul className="space-y-2 text-gray-700">
-                <li>✓ 10K $BASED unlocks tier</li>
-                <li>✓ Advanced yield strategies</li>
-                <li>✓ 0.05% deposit + 1% unlock fee</li>
+            {/* Aggressive */}
+            <div className="card border-2 border-blue-600">
+              <div className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">
+                Most popular
+              </div>
+              <div className="mb-6">
+                <h3 className="text-2xl font-semibold mb-2 text-gray-900">Aggressive</h3>
+                <div className="text-4xl font-semibold text-blue-600 mb-1">15-20%</div>
+                <div className="text-gray-500">APY target</div>
+              </div>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>10K $BASED required</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Multi-chain strategies</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Higher yields</span>
+                </li>
               </ul>
             </div>
 
-            <div className="card border-2 border-purple-200">
-              <h3 className="text-2xl font-bold mb-2 text-gray-900">Life Changing</h3>
-              <div className="text-4xl font-bold text-purple-600 mb-4">30-100%+</div>
-              <p className="text-gray-600 mb-4">Target APY</p>
-              <ul className="space-y-2 text-gray-700">
-                <li>✓ 50K $BASED unlocks tier</li>
-                <li>✓ High-yield opportunities</li>
-                <li>✓ 0% deposit + 2% unlock fee</li>
+            {/* Life Changing */}
+            <div className="card">
+              <div className="mb-6">
+                <h3 className="text-2xl font-semibold mb-2 text-gray-900">Life Changing</h3>
+                <div className="text-4xl font-semibold text-blue-600 mb-1">30-100%+</div>
+                <div className="text-gray-500">APY target</div>
+              </div>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>50K $BASED required</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Elite opportunities</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">✓</span>
+                  <span>Maximum returns</span>
+                </li>
               </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why BASED */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-12">Why BASED Protocol</h2>
+      {/* Trust section - Chase bank style */}
+      <section className="py-24 bg-gray-50 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-semibold mb-4 text-gray-900">Built for trust</h2>
+            <p className="text-xl text-gray-600">Professional fund management meets DeFi innovation</p>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="card">
-              <h3 className="text-xl font-bold mb-3 text-blue-600">Real Utility, Real Value</h3>
-              <p className="text-gray-700">
-                Every protocol fee automatically buys back $BASED. 50% buyback, 25% burned forever, 25% to stakers. Constant buy pressure.
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Transparent operations</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Every transaction on-chain. Full visibility into fund allocations, yields, and buyback activity.
               </p>
             </div>
+            
             <div className="card">
-              <h3 className="text-xl font-bold mb-3 text-blue-600">Professional Management</h3>
-              <p className="text-gray-700">
-                Funds deployed across proven Solana DeFi protocols. Automated strategies optimized for yield with built-in risk management.
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Proven protocols</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Your USDC deployed only to battle-tested DeFi protocols with strong track records.
               </p>
             </div>
+            
             <div className="card">
-              <h3 className="text-xl font-bold mb-3 text-blue-600">Automatic Tier Unlocks</h3>
-              <p className="text-gray-700">
-                Deposit USDC, protocol automatically buys $BASED to unlock higher tiers. No manual swapping required.
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Automatic diversification</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Multi-chain deployment across Solana, Ethereum, and L2s. Risk management built in.
               </p>
             </div>
+            
             <div className="card">
-              <h3 className="text-xl font-bold mb-3 text-blue-600">Aligned Incentives</h3>
-              <p className="text-gray-700">
-                Founder holds $BASED. Team holds $BASED. We win when you win.
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Aligned incentives</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Founder and team hold $BASED. We only win when you win.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-5xl font-semibold mb-6 text-gray-900">
+            Ready to start earning?
+          </h2>
+          <p className="text-xl text-gray-600 mb-10">
+            Join BASED Protocol today
+          </p>
+          <Link href="/stake" className="btn-primary text-lg inline-block">
+            Get started
+          </Link>
         </div>
       </section>
     </div>
