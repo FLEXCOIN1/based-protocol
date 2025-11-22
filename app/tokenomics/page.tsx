@@ -1,178 +1,225 @@
 export default function Tokenomics() {
   return (
-    <div className="min-h-screen py-20">
-      <div className="max-w-6xl mx-auto px-6">
-        <h1 className="text-5xl font-bold text-center mb-6">Roadmap to Dominance</h1>
-        <p className="text-xl text-gray-600 text-center mb-16">
-          From Pump.fun launch to full DeFi integration - here's how we scale to $100M+ AUM
-        </p>
+    <div className="min-h-screen bg-white">
+      <div className="pt-32 pb-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl font-bold mb-6">$BASED Tokenomics</h1>
+          <p className="text-xl text-gray-600 mb-12">Deflationary utility token with integrated buyback & burn</p>
 
-        {/* Phase 1: Pump.fun */}
-        <div className="card mb-8 border-l-4 border-blue-600">
-          <div className="flex items-start gap-4">
-            <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">1</div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2">Token Launch on Pump.fun</h2>
-              <p className="text-blue-600 font-semibold mb-4">December 3rd, 2025 - LIVE</p>
-              
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-4">
-                <h3 className="font-bold mb-3">Launch Details</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li>✓ $BASED launches on Pump.fun with fair launch mechanics</li>
-                  <li>✓ Community-driven liquidity bootstrapping</li>
-                  <li>✓ Marketing campaign across Twitter, Telegram, Discord</li>
-                  <li>✓ Early holder rewards and community building</li>
-                </ul>
+          {/* Token Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-gray-50 rounded-xl p-8 text-center">
+              <div className="text-sm text-gray-600 mb-2">Total Supply</div>
+              <div className="text-3xl font-bold">1,000,000,000</div>
+              <div className="text-sm text-gray-500 mt-1">1 Billion $BASED</div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-xl p-8 text-center">
+              <div className="text-sm text-gray-600 mb-2">Launch Date</div>
+              <div className="text-3xl font-bold">Dec 3, 2025</div>
+              <div className="text-sm text-gray-500 mt-1">Pump.fun Launch</div>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-8 text-center">
+              <div className="text-sm text-gray-600 mb-2">Chain</div>
+              <div className="text-3xl font-bold">Solana</div>
+              <div className="text-sm text-gray-500 mt-1">SPL Token Standard</div>
+            </div>
+          </div>
+
+          {/* Distribution */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-6">Token Distribution</h2>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-32 text-right font-bold">80%</div>
+                <div className="flex-1 h-12 bg-blue-600 rounded-lg flex items-center px-4 text-white font-semibold">
+                  Pump.fun Liquidity Pool
+                </div>
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-                  <div className="text-2xl font-bold text-blue-600">500+</div>
-                  <div className="text-sm text-gray-600">Holders Week 1</div>
+              <div className="flex items-center gap-4">
+                <div className="w-32 text-right font-bold">10%</div>
+                <div className="flex-1 h-12 bg-blue-500 rounded-lg flex items-center px-4 text-white font-semibold">
+                  Protocol Treasury (24mo vest)
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-                  <div className="text-2xl font-bold text-blue-600">$50K</div>
-                  <div className="text-sm text-gray-600">Market Cap</div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-32 text-right font-bold">5%</div>
+                <div className="flex-1 h-12 bg-blue-400 rounded-lg flex items-center px-4 text-white font-semibold">
+                  Team (36mo vest)
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-                  <div className="text-2xl font-bold text-blue-600">$25K</div>
-                  <div className="text-sm text-gray-600">Daily Volume</div>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-                  <div className="text-2xl font-bold text-blue-600">1000+</div>
-                  <div className="text-sm text-gray-600">Community</div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-32 text-right font-bold">5%</div>
+                <div className="flex-1 h-12 bg-blue-300 rounded-lg flex items-center px-4 text-white font-semibold">
+                  Marketing & Partnerships
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Phase 2: Raydium */}
-        <div className="card mb-8 border-l-4 border-purple-600">
-          <div className="flex items-start gap-4">
-            <div className="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">2</div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2">Raydium Migration at $69K</h2>
-              <p className="text-gray-600 font-semibold mb-4">Late December 2025</p>
-              
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-4">
-                <h3 className="font-bold mb-3">Professional DEX Listing</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li>✓ Migrate liquidity to Raydium when market cap hits $69K</li>
-                  <li>✓ Create $BASED-SOL and $BASED-USDC trading pairs</li>
-                  <li>✓ Jupiter integration for seamless swaps across Solana</li>
-                  <li>✓ CoinGecko and CoinMarketCap listings</li>
-                </ul>
+          {/* Deflationary Mechanism */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-6">Deflationary Mechanism</h2>
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-8">
+              <div className="text-center mb-8">
+                <div className="text-lg font-semibold mb-2">Protocol Revenue Split</div>
+                <div className="text-sm text-gray-600">Deposit fees (0.5%) + Exit fees (0-50%) = Revenue</div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
-                  <div className="text-2xl font-bold text-purple-600">2,000+</div>
-                  <div className="text-sm text-gray-600">Holders</div>
+              <div className="space-y-6">
+                <div className="flex items-center gap-6">
+                  <div className="flex-shrink-0 w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold">
+                    50%
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-lg mb-1">Buyback $BASED</div>
+                    <p className="text-sm text-gray-600">Protocol buys $BASED from open market via Jupiter</p>
+                  </div>
                 </div>
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
-                  <div className="text-2xl font-bold text-purple-600">$500K</div>
-                  <div className="text-sm text-gray-600">Market Cap</div>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
-                  <div className="text-2xl font-bold text-purple-600">$100K</div>
-                  <div className="text-sm text-gray-600">Daily Volume</div>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
-                  <div className="text-2xl font-bold text-purple-600">$200K</div>
-                  <div className="text-sm text-gray-600">Liquidity</div>
+
+                <div className="ml-8 space-y-4">
+                  <div className="flex items-center gap-6">
+                    <div className="flex-shrink-0 w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                      25%
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold mb-1">🔥 Burn Forever</div>
+                      <p className="text-sm text-gray-600">Sent to dead address, removed from supply permanently</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6">
+                    <div className="flex-shrink-0 w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                      25%
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold mb-1">💎 Distribute to Stakers</div>
+                      <p className="text-sm text-gray-600">Rewards for $BASED holders who stake their tokens</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Phase 3: ETF Integration */}
-        <div className="card mb-8 border-l-4 border-green-600">
-          <div className="flex items-start gap-4">
-            <div className="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">3</div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2">Full DeFi Fund Launch</h2>
-              <p className="text-green-600 font-semibold mb-4">Q1 2026</p>
-              
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-4">
-                <h3 className="font-bold mb-3">Complete Protocol Integration</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li>✓ All 3 tiers operational (Conservative/Aggressive/Life Changing)</li>
-                  <li>✓ Integration with Kamino, Jito, Meteora, Marinade</li>
-                  <li>✓ Automated buyback/burn system live</li>
-                  <li>✓ Staking rewards distribution automated</li>
-                  <li>✓ Automatic tier unlocks via Jupiter swaps</li>
-                </ul>
-              </div>
+          {/* Example Calculation */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-6">Example: Buyback Impact</h2>
+            <div className="bg-gray-50 p-8 rounded-xl">
+              <div className="space-y-4">
+                <div className="flex justify-between pb-3 border-b">
+                  <span className="font-semibold">Scenario:</span>
+                  <span>$10M TVL, 20% annual turnover</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Annual exits:</span>
+                  <span className="font-mono">$2,000,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Average exit fee (15%):</span>
+                  <span className="font-mono">$300,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Deposit fees:</span>
+                  <span className="font-mono">$50,000</span>
+                </div>
+                <div className="flex justify-between font-bold border-t pt-3">
+                  <span>Total Revenue:</span>
+                  <span className="font-mono">$350,000</span>
+                </div>
+                
+                <div className="mt-6 pt-6 border-t space-y-2">
+                  <div className="flex justify-between text-blue-600">
+                    <span>50% → Buyback:</span>
+                    <span className="font-mono font-bold">$175,000</span>
+                  </div>
+                  <div className="flex justify-between text-orange-500 ml-4">
+                    <span>25% → Burn:</span>
+                    <span className="font-mono font-bold">$87,500</span>
+                  </div>
+                  <div className="flex justify-between text-green-600 ml-4">
+                    <span>25% → Stakers:</span>
+                    <span className="font-mono font-bold">$87,500</span>
+                  </div>
+                </div>
 
-              <h3 className="font-bold text-xl mb-4">12-Month Growth Projections</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border border-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="p-3 border-b">Quarter</th>
-                      <th className="p-3 border-b">Users</th>
-                      <th className="p-3 border-b">Total AUM</th>
-                      <th className="p-3 border-b">Monthly Fees</th>
-                      <th className="p-3 border-b">Buyback/Month</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-700">
-                    <tr className="border-b">
-                      <td className="p-3">Q1 2026</td>
-                      <td className="p-3">200-300</td>
-                      <td className="p-3">$500K-$1M</td>
-                      <td className="p-3">$2.5K-$5K</td>
-                      <td className="p-3 font-bold text-green-600">$1.25K-$2.5K</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-3">Q2 2026</td>
-                      <td className="p-3">500-750</td>
-                      <td className="p-3">$2M-$5M</td>
-                      <td className="p-3">$10K-$25K</td>
-                      <td className="p-3 font-bold text-green-600">$5K-$12.5K</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-3">Q3 2026</td>
-                      <td className="p-3">1K-1.5K</td>
-                      <td className="p-3">$5M-$15M</td>
-                      <td className="p-3">$25K-$75K</td>
-                      <td className="p-3 font-bold text-green-600">$12.5K-$37.5K</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3">Q4 2026</td>
-                      <td className="p-3">2K-3K</td>
-                      <td className="p-3">$15M-$50M</td>
-                      <td className="p-3">$75K-$250K</td>
-                      <td className="p-3 font-bold text-green-600">$37.5K-$125K</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="mt-6 pt-6 border-t">
+                  <p className="text-sm text-gray-600">
+                    <strong>Result:</strong> $175K annual buy pressure + 87.5K tokens burned (0.00875% of supply) + $87.5K rewards to stakers
+                  </p>
+                </div>
               </div>
-              <p className="text-green-600 font-bold mt-4 text-center">
-                At $50M AUM: $250K monthly buyback = $3M annually buying $BASED from the market
-              </p>
             </div>
           </div>
-        </div>
 
-        {/* Phase 4: Scale */}
-        <div className="card border-l-4 border-indigo-600">
-          <div className="flex items-start gap-4">
-            <div className="bg-indigo-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">4</div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2">Scale to Dominance</h2>
-              <p className="text-gray-600 font-semibold mb-4">2027 and Beyond</p>
-              
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <ul className="space-y-2 text-gray-700">
-                  <li>✓ Cross-chain expansion: Ethereum, Arbitrum, Base</li>
-                  <li>✓ Institutional partnerships and whale tiers</li>
-                  <li>✓ Governance launch: $BASED holders vote on strategies</li>
-                  <li>✓ Target: $100M+ AUM, top 10 DeFi protocol on Solana</li>
-                </ul>
+          {/* Utility */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-6">$BASED Utility</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-gray-200 rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-2">ETF Allocation</h3>
+                <p className="text-gray-600 text-sm">5-25% of every ETF tier automatically purchases $BASED, creating constant demand</p>
               </div>
+              
+              <div className="border border-gray-200 rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-2">Staking Rewards</h3>
+                <p className="text-gray-600 text-sm">Earn 25% of protocol revenue by staking $BASED tokens</p>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-2">Governance (Future)</h3>
+                <p className="text-gray-600 text-sm">Vote on protocol changes, new asset additions, and fee structures</p>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-2">Deflationary</h3>
+                <p className="text-gray-600 text-sm">25% of buyback burned forever, continuously reducing total supply</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Launch Timeline */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-6">Launch Timeline</h2>
+            <div className="space-y-6">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-32 text-right font-bold text-blue-600">Dec 3, 2025</div>
+                <div className="flex-1 border-l-4 border-blue-600 pl-6 pb-6">
+                  <h3 className="font-bold text-lg mb-2">Token Launch</h3>
+                  <p className="text-gray-600">$BASED launches on Pump.fun. Community building begins.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-32 text-right font-bold text-gray-600">Mid-Dec 2025</div>
+                <div className="flex-1 border-l-4 border-gray-300 pl-6 pb-6">
+                  <h3 className="font-bold text-lg mb-2">Raydium Graduation</h3>
+                  <p className="text-gray-600">Bonding curve completes, $BASED migrates to Raydium liquidity pool.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-32 text-right font-bold text-gray-600">Q1 2026</div>
+                <div className="flex-1 border-l-4 border-gray-300 pl-6">
+                  <h3 className="font-bold text-lg mb-2">Full ETF Launch</h3>
+                  <p className="text-gray-600">BASED Protocol goes live. Automatic portfolio buying begins. Buyback-and-burn mechanism activates.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="bg-gray-900 text-white rounded-xl p-12 text-center">
+            <h3 className="text-2xl font-bold mb-4">$BASED Token Launches December 3rd</h3>
+            <p className="text-gray-400 mb-6">Join the community and be ready for launch day</p>
+            <div className="flex gap-4 justify-center">
+              <a href="https://discord.gg/based" className="px-8 py-4 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100">
+                Join Discord
+              </a>
+              <a href="https://twitter.com/basedprotocol" className="px-8 py-4 border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-gray-900">
+                Follow on X
+              </a>
             </div>
           </div>
         </div>
