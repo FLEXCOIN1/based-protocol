@@ -585,9 +585,8 @@ export default function Home() {
             <div>
               <h3 className="text-white font-bold mb-4">Community</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">Twitter</a></li>
-                <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">Discord</a></li>
-                <li><a href="https://t.me" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">Telegram</a></li>
+                <li><a href="https://x.com/basedproto78004" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">Twitter</a></li>
+                <li><a href="https://t.me/+pyp5gzRdyBRkNGUx" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">Telegram</a></li>
               </ul>
             </div>
           </div>
