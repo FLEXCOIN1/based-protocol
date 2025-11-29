@@ -1,0 +1,28 @@
+[[redirects]]
+  from = "http://usbased.xyz/*"
+  to = "https://usbased.xyz/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.usbased.xyz/*"
+  to = "https://usbased.xyz/:splat"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Force HTTPS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    # Additional security headers
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[build]
+  publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
