@@ -13,11 +13,8 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    # Force HTTPS
+    # Force HTTPS only - Let Next.js handle CSP and other security headers
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    # Additional security headers
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
 
 [build]
   command = "npm run build"
