@@ -217,6 +217,381 @@ export default function Whitepaper() {
         </div>
       </section>
 
+      {/* 4. Tokenomics */}
+      <section className="py-24 px-6 bg-slate-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 mb-3 font-semibold">SECTION 4</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Tokenomics</h2>
+          </div>
+
+          <div className="space-y-8">
+            <div className="bg-white p-8 rounded-xl border-2 border-slate-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Supply & Distribution</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                  <span className="text-slate-600 font-semibold">Total Supply:</span>
+                  <span className="text-2xl font-bold text-slate-900">1,000,000,000 $BASED</span>
+                </div>
+                <div className="mt-6 space-y-3">
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 text-right font-bold text-emerald-600">80%</div>
+                    <div className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-400 h-12 rounded-lg flex items-center px-4 text-white font-semibold">
+                      Pump.fun Liquidity Pool
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 text-right font-bold text-blue-600">10%</div>
+                    <div className="flex-1 bg-gradient-to-r from-blue-500 to-blue-400 h-12 rounded-lg flex items-center px-4 text-white font-semibold">
+                      Protocol Treasury (24mo vest)
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 text-right font-bold text-purple-600">5%</div>
+                    <div className="flex-1 bg-gradient-to-r from-purple-500 to-purple-400 h-12 rounded-lg flex items-center px-4 text-white font-semibold">
+                      Team (36mo vest)
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 text-right font-bold text-orange-600">5%</div>
+                    <div className="flex-1 bg-gradient-to-r from-orange-500 to-orange-400 h-12 rounded-lg flex items-center px-4 text-white font-semibold">
+                      Marketing & Partnerships
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl border-2 border-slate-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Buyback & Burn Mechanism</h3>
+              <p className="text-slate-600 mb-6">
+                50% of all protocol revenue (deposit fees + exit fees) is used to buy back $BASED tokens from the open market.
+              </p>
+              <div className="bg-gradient-to-br from-emerald-50 to-blue-50 p-6 rounded-lg border-2 border-emerald-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl font-bold text-white">25%</span>
+                    </div>
+                    <h4 className="font-bold text-slate-900 mb-2">Burned Forever</h4>
+                    <p className="text-sm text-slate-600">Permanently removed from circulation</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl font-bold text-white">25%</span>
+                    </div>
+                    <h4 className="font-bold text-slate-900 mb-2">Staking Rewards</h4>
+                    <p className="text-sm text-slate-600">Distributed to $BASED stakers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl border-2 border-slate-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Deflationary Mechanics</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Continuous Buybacks:</strong> Protocol revenue creates constant buy pressure on $BASED
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Permanent Burns:</strong> 25% of bought tokens removed from supply forever
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Staking Incentives:</strong> Holders earn passive income by staking $BASED
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Supply Reduction:</strong> Circulating supply decreases over time as protocol grows
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Security & Audits */}
+      <section className="py-24 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 mb-3 font-semibold">SECTION 5</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Security & Audits</h2>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-slate-50 to-white p-8 rounded-xl border-2 border-slate-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+                <Shield className="w-6 h-6 text-emerald-600" />
+                Smart Contract Details
+              </h3>
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-600 w-32">Program ID:</span>
+                  <code className="bg-slate-100 px-4 py-2 rounded-lg text-sm font-mono text-slate-900 break-all">
+                    4DwCVbdc5AxpPsVULdpATygFEJrwT87Zf8L6CrbfBmKd
+                  </code>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-600 w-32">Network:</span>
+                  <span className="text-slate-900">Solana Devnet (Mainnet deployment planned)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-600 w-32">Framework:</span>
+                  <span className="text-slate-900">Anchor v0.32.1</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-600 w-32">Language:</span>
+                  <span className="text-slate-900">Rust</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-xl border-2 border-emerald-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Security Measures</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Anchor Framework:</strong> Industry-standard Solana development framework with built-in security features
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Non-Custodial:</strong> Users maintain control of their funds at all times
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>Open Source:</strong> Code available for community review and verification
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <strong>PDA Architecture:</strong> Program Derived Addresses for secure account management
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-xl border-2 border-blue-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Audit Timeline</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-24 h-24 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl font-bold text-blue-600">Q1</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-slate-900 mb-2">Q1 2025 - Security Audits</h4>
+                    <p className="text-sm text-slate-600">
+                      Professional smart contract audits scheduled with leading blockchain security firms.
+                      Full audit reports will be published before mainnet deployment.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-24 h-24 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl font-bold text-emerald-600">Q2</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-slate-900 mb-2">Q2 2025 - Mainnet Launch</h4>
+                    <p className="text-sm text-slate-600">
+                      Following successful audits and any necessary fixes, protocol will deploy to Solana mainnet
+                      with full security guarantees.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Roadmap */}
+      <section className="py-24 px-6 bg-slate-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 mb-3 font-semibold">SECTION 6</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Roadmap</h2>
+          </div>
+
+          <div className="space-y-6">
+            {/* Phase 1 */}
+            <div className="bg-white p-8 rounded-xl border-2 border-emerald-500 relative">
+              <div className="absolute -top-4 left-8 bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                PHASE 1 - CURRENT
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Pump.fun Token Launch</h3>
+                <p className="text-sm text-emerald-600 font-semibold mb-4">December 3rd, 2025</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>$BASED token goes live on Pump.fun</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Fair launch with no presale or VCs</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Community building and marketing campaign</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Protocol website and documentation launch</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Phase 2 */}
+            <div className="bg-white p-8 rounded-xl border-2 border-slate-300 relative">
+              <div className="absolute -top-4 left-8 bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-bold">
+                PHASE 2
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Raydium Graduation</h3>
+                <p className="text-sm text-slate-600 font-semibold mb-4">Target: $69K Market Cap</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Graduate from Pump.fun to Raydium DEX</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Enhanced liquidity and trading volume</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>DEX aggregator listings (Jupiter, etc.)</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Broader market exposure and accessibility</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Phase 3 */}
+            <div className="bg-white p-8 rounded-xl border-2 border-slate-300 relative">
+              <div className="absolute -top-4 left-8 bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold">
+                PHASE 3
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Protocol Activation</h3>
+                <p className="text-sm text-slate-600 font-semibold mb-4">Q1 2026</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Smart contract audits completed</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Full ETF protocol launches on mainnet</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>USDC deposits and withdrawals enabled</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>All three investment tiers activated</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Buyback & burn mechanism goes live</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Phase 4 */}
+            <div className="bg-white p-8 rounded-xl border-2 border-slate-300 relative">
+              <div className="absolute -top-4 left-8 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold">
+                PHASE 4
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Expansion & Growth</h3>
+                <p className="text-sm text-slate-600 font-semibold mb-4">Q2 2026 and Beyond</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Additional investment tiers and strategies</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Cross-chain expansion (Ethereum, Arbitrum, etc.)</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Governance token and DAO implementation</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Additional yield strategies and partnerships</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>Mobile app development</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Legal Disclaimer */}
+      <section className="py-16 px-6 bg-amber-50 border-t-4 border-amber-400">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white p-8 rounded-xl border-2 border-amber-200">
+            <h3 className="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2">
+              ⚠️ Legal Disclaimer
+            </h3>
+            <div className="prose prose-slate max-w-none text-sm text-slate-700 space-y-3">
+              <p>
+                <strong>This is not financial advice.</strong> The information provided in this whitepaper is for educational
+                and informational purposes only and should not be construed as financial, investment, legal, or tax advice.
+              </p>
+              <p>
+                <strong>No Guarantees:</strong> Target APYs mentioned are estimates based on historical DeFi protocol performance
+                and are not guarantees of future results. Actual returns may be higher or lower and can fluctuate significantly.
+              </p>
+              <p>
+                <strong>High Risk:</strong> Cryptocurrency and DeFi investments are highly volatile and carry substantial risk.
+                You could lose some or all of your invested capital. Market conditions, smart contract bugs, protocol exploits,
+                and other unforeseen events can result in total loss.
+              </p>
+              <p>
+                <strong>Only Invest What You Can Afford to Lose:</strong> Never invest money you cannot afford to lose entirely.
+                Do your own research (DYOR) and consult with qualified financial advisors before making any investment decisions.
+              </p>
+              <p>
+                <strong>Regulatory Risk:</strong> Cryptocurrency regulations vary by jurisdiction and are subject to change.
+                You are responsible for ensuring compliance with laws in your country of residence.
+              </p>
+              <p className="text-xs text-slate-500 mt-4">
+                Last Updated: November 2025 | BASED Protocol | © 2025 All Rights Reserved
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24 px-6 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
         <div className="max-w-4xl mx-auto text-center">
