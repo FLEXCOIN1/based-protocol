@@ -1,18 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { WalletContextProvider } from "@/components/WalletProvider";
 import Navigation from "@/components/Navigation";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "BASED Protocol - Professional DeFi Fund on Solana",
@@ -26,16 +15,47 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <WalletContextProvider>
           <Navigation />
-          {children}
-          <footer className="bg-white border-t border-gray-200 py-6 mt-20">
-            <div className="max-w-7xl mx-auto px-6 text-center">
-              <p className="text-xs text-gray-500 mb-2">
-                High-risk investment. Cryptocurrency is volatile and may result in total loss. Not FDIC insured. Don't invest what you can't afford to lose. Past performance doesn't guarantee future results.
-              </p>
-              <p className="text-xs text-gray-400">© 2025 BASED Protocol. Founded by Sirmark Critney, Developer & Crypto Fund Manager.</p>
+          <main>{children}</main>
+          <footer className="bg-slate-900 text-white py-16 px-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div>
+                  <h4 className="text-xl font-bold mb-4">BASED Protocol</h4>
+                  <p className="text-slate-400 text-sm">Professional DeFi fund management on Solana</p>
+                </div>
+                <div>
+                  <h5 className="font-semibold mb-4 text-slate-300">Product</h5>
+                  <div className="space-y-3 text-slate-400 text-sm">
+                    <div><a href="/dashboard" className="hover:text-white transition">Dashboard</a></div>
+                    <div><a href="/how-it-works" className="hover:text-white transition">How It Works</a></div>
+                    <div><a href="/tokenomics" className="hover:text-white transition">Tokenomics</a></div>
+                  </div>
+                </div>
+                <div>
+                  <h5 className="font-semibold mb-4 text-slate-300">Resources</h5>
+                  <div className="space-y-3 text-slate-400 text-sm">
+                    <div><a href="/whitepaper" className="hover:text-white transition">Whitepaper</a></div>
+                    <div><a href="/faq" className="hover:text-white transition">FAQ</a></div>
+                  </div>
+                </div>
+                <div>
+                  <h5 className="font-semibold mb-4 text-slate-300">Community</h5>
+                  <div className="space-y-3 text-slate-400 text-sm">
+                    <div><a href="#" className="hover:text-white transition">Twitter</a></div>
+                    <div><a href="#" className="hover:text-white transition">Discord</a></div>
+                    <div><a href="#" className="hover:text-white transition">Telegram</a></div>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-800 pt-8">
+                <p className="text-xs text-slate-500 text-center leading-relaxed">
+                  Risk Warning: Cryptocurrency investments carry significant risk. Past performance does not guarantee future results. 
+                  Only invest what you can afford to lose. © 2025 BASED Protocol. Founded by Sirmark Critney.
+                </p>
+              </div>
             </div>
           </footer>
         </WalletContextProvider>

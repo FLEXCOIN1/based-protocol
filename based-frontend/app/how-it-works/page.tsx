@@ -1,109 +1,115 @@
+'use client';
+
+import Link from 'next/link';
+import { ArrowRight, Shield, TrendingUp, Wallet, Zap, Lock, RefreshCw, BarChart3, ChevronRight } from 'lucide-react';
+
 export default function HowItWorks() {
   return (
-    <div className="min-h-screen py-20">
-      <div className="max-w-5xl mx-auto px-6">
-        <h1 className="text-5xl font-bold mb-6 text-center">How $BASED Creates Value</h1>
-        <p className="text-xl text-gray-600 text-center mb-16">
-          Real revenue. Real buybacks. Real burns. This is how we build token value.
-        </p>
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-b from-white to-slate-100 py-24 px-6 overflow-hidden">
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)',
+            backgroundSize: '30px 30px'
+          }}></div>
+        </div>
 
-        {/* Revenue Engine */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">The Revenue Engine</h2>
-          
-          <div className="card mb-6">
-            <h3 className="text-xl font-bold mb-3 text-blue-600">Step 1: Users Deposit USDC</h3>
-            <p className="text-gray-700 mb-4">
-              Users choose their tier and deposit USDC into the protocol. This capital gets deployed into proven DeFi strategies across Solana - Kamino lending, Jito staking, Meteora liquidity pools.
-            </p>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 mb-4 font-semibold">PROTOCOL OVERVIEW</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
+            How BASED Protocol Works
+          </h1>
+          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">
+            A comprehensive guide to understanding our institutional-grade DeFi fund structure,
+            automatic token buyback mechanism, and tier-based investment strategies.
+          </p>
+        </div>
+      </section>
+
+      {/* Core Mechanism */}
+      <section className="py-24 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 mb-3 font-semibold">CORE MECHANISM</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">The Investment Flow</h2>
+            <p className="text-lg text-slate-600">From deposit to yield generation in 4 automatic steps</p>
           </div>
 
-          <div className="card mb-6">
-            <h3 className="text-xl font-bold mb-3 text-blue-600">Step 2: Protocol Generates Yield</h3>
-            <p className="text-gray-700 mb-4">
-              Your USDC works across multiple DeFi protocols simultaneously:
-            </p>
-            <ul className="space-y-2 text-gray-700 ml-4">
-              <li>• Conservative: 10-12% APY from stable lending</li>
-              <li>• Aggressive: 15-20% APY from diversified strategies</li>
-              <li>• Life Changing: 30-100%+ APY from high-yield opportunities</li>
-            </ul>
-          </div>
-
-          <div className="card">
-            <h3 className="text-xl font-bold mb-3 text-blue-600">Step 3: Fee Collection</h3>
-            <p className="text-gray-700 mb-4">
-              Protocol collects fees on deposits and withdrawals. These fees power the entire $BASED ecosystem.
-            </p>
-            <div className="grid grid-cols-3 gap-4 mt-4">
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="font-bold text-blue-600">Conservative</div>
-                <div className="text-2xl font-bold">0.1%</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            {/* Step 1 */}
+            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
+              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
+                1
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="font-bold text-blue-600">Aggressive</div>
-                <div className="text-2xl font-bold">1.05%</div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="font-bold text-purple-600">Life Changing</div>
-                <div className="text-2xl font-bold">2%</div>
-              </div>
+              <Wallet className="w-12 h-12 text-emerald-600 mb-4" />
+              <h3 className="text-xl font-bold text-slate-900 mb-3">You Deposit USDC</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Connect your wallet and deposit USDC into your chosen investment tier. Your funds are immediately secured
+                in our audited smart contracts on Solana.
+              </p>
             </div>
-          </div>
-        </section>
 
-        {/* Buyback Machine */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">The Buyback Machine</h2>
-          
-          <div className="card bg-blue-50 border-2 border-blue-200">
-            <h3 className="text-2xl font-bold mb-6 text-center">Where Protocol Fees Go</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="text-4xl font-bold text-blue-600 mb-2">50%</div>
-                <div className="font-bold mb-2">Buyback $BASED</div>
-                <p className="text-gray-600 text-sm">
-                  Half of all fees automatically buy $BASED from the market. Constant buy pressure every single day.
-                </p>
+            {/* Step 2 */}
+            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
+              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
+                2
               </div>
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="text-4xl font-bold text-blue-600 mb-2">25%</div>
-                <div className="font-bold mb-2">Burn Forever</div>
-                <p className="text-gray-600 text-sm">
-                  Burned tokens permanently removed from supply. Supply decreases while demand increases.
-                </p>
-              </div>
+              <RefreshCw className="w-12 h-12 text-emerald-600 mb-4" />
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Auto-Buy $BASED Tokens</h3>
+              <p className="text-slate-600 leading-relaxed">
+                The protocol automatically uses a portion of your deposit to purchase the required amount of $BASED tokens
+                (if applicable to your tier). These tokens are locked to your position.
+              </p>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <div className="text-4xl font-bold text-blue-600 mb-2">25%</div>
-              <div className="font-bold mb-2">Distribute to Stakers</div>
-              <p className="text-gray-600 text-sm">
-                Hold and stake $BASED? You get a share of protocol revenue. Your investment pays dividends.
+
+            {/* Step 3 */}
+            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
+              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
+                3
+              </div>
+              <TrendingUp className="w-12 h-12 text-emerald-600 mb-4" />
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Funds Deploy to Strategies</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Remaining USDC is allocated across curated yield strategies: Kamino lending, Jito staking,
+                Meteora liquidity pools, and other institutional-grade protocols.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
+              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
+                4
+              </div>
+              <BarChart3 className="w-12 h-12 text-emerald-600 mb-4" />
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Earn & Compound Yield</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Your investment generates yield according to your tier's strategy. Yields compound automatically,
+                and you can withdraw anytime (subject to tier-specific unlock fees).
               </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Real Example */}
-        <section>
-          <div className="card">
-            <h3 className="text-2xl font-bold mb-4">Real World Example</h3>
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <p className="text-gray-700 mb-4 font-semibold">Protocol has $1M in deposits. Over one month:</p>
-              <ol className="space-y-2 text-gray-700 list-decimal ml-6">
-                <li>Generates $15,000 in yields (1.5% monthly average)</li>
-                <li>Collects $3,000 in protocol fees</li>
-                <li>$1,500 automatically buys $BASED → price goes up</li>
-                <li>$750 of $BASED burned → supply goes down</li>
-                <li>$750 distributed to stakers → passive income</li>
-              </ol>
-              <p className="text-blue-600 font-bold mt-4">
-                Result: Buy pressure + Decreasing supply + Staker rewards = Token value increases
-              </p>
-            </div>
+      {/* CTA Section */}
+      <section className="py-24 px-6 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Earning?</h2>
+          <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
+            Choose your investment tier and start generating yield with institutional-grade DeFi strategies.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/dashboard" className="bg-emerald-500 text-white px-8 py-4 rounded-lg font-bold hover:bg-emerald-400 transition-all inline-flex items-center justify-center gap-2">
+              Go to Dashboard
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link href="/tokenomics" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-semibold hover:bg-slate-100 transition-all">
+              View Tokenomics
+            </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,53 +1,67 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "@solana/wallet-adapter-react-ui/styles.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
 
 body {
-  background-color: #ffffff;
-  color: #0a0a0a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
-.btn-primary {
-  background-color: #0052ff;
-  color: white;
-  font-weight: 500;
-  padding: 14px 32px;
-  border-radius: 8px;
-  transition: all 0.15s;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
+/* Custom Wallet Button Styles - USCR Theme */
+.wallet-adapter-button {
+  background-color: #10b981 !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s !important;
 }
 
-.btn-primary:hover {
-  background-color: #0045d8;
-  transform: translateY(-1px);
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: #059669 !important;
 }
 
-.btn-secondary {
-  background-color: #f5f7f9;
-  color: #0a0a0a;
-  font-weight: 500;
-  padding: 14px 32px;
-  border-radius: 8px;
-  transition: all 0.15s;
-  font-size: 16px;
-  border: 1px solid #e8ebee;
+.wallet-adapter-button-trigger {
+  background-color: #10b981 !important;
 }
 
-.btn-secondary:hover {
-  background-color: #eef1f4;
+.wallet-adapter-modal-wrapper {
+  background: rgba(0, 0, 0, 0.8) !important;
 }
 
-.card {
-  background-color: #ffffff;
-  border: 1px solid #e8ebee;
-  border-radius: 16px;
-  padding: 32px;
-  transition: box-shadow 0.2s;
+.wallet-adapter-modal {
+  background: #1e293b !important;
+  border: 2px solid #10b981 !important;
+  border-radius: 1rem !important;
 }
 
-.card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+.wallet-adapter-modal-title {
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background-color: #334155 !important;
+  border: 1px solid #475569 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background-color: #475569 !important;
+  border-color: #10b981 !important;
 }
