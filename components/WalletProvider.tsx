@@ -25,7 +25,7 @@ export const WalletContextProvider: FC<{ children: ReactNode }> = ({ children })
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={true}>
+      <WalletProvider wallets={wallets} autoConnect={false}>
         <WalletModalProvider>
           {children}
         </WalletModalProvider>
