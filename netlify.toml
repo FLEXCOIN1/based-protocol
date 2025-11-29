@@ -1,7 +1,11 @@
 [build]
-base = "based-frontend"
-command = "npm run build"
-publish = ".next"
+  base = "based-frontend"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
-package = "@netlify/plugin-nextjs"
+  package = "@netlify/plugin-nextjs"
