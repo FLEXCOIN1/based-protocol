@@ -20,11 +20,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 [build]
-  base = "based-frontend"
   command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
