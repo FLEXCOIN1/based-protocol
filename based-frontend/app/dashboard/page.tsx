@@ -60,9 +60,17 @@ export default function Dashboard() {
       const program = await getProgram(wallet.adapter as any);
 
       // Fetch protocol state
-      const protocolState = await getProtocolState(program);
-      setTotalNav(protocolState.totalNav.toNumber() / 1_000_000); // Convert from lamports
-      setTotalShares(protocolState.totalShares.toNumber() / 1_000_000);
+      try {
+        const protocolState = await getProtocolState(program);
+        setTotalNav(protocolState.totalNav.toNumber() / 1_000_000); // Convert from lamports
+        setTotalShares(protocolState.totalShares.toNumber() / 1_000_000);
+      } catch (stateError: any) {
+        console.log('Protocol not initialized yet:', stateError);
+        // Protocol hasn't been initialized - show warning but don't fail
+        setError('Protocol is not initialized yet. The admin needs to initialize the protocol before deposits can be made.');
+        setTotalNav(0);
+        setTotalShares(0);
+      }
 
       // Fetch user position
       const position = await getUserPosition(program, publicKey);
