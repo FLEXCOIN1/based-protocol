@@ -36,57 +36,95 @@ export default function HowItWorks() {
             <p className="text-lg text-slate-600">From deposit to yield generation in 4 automatic steps</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            {/* Step 1 */}
-            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
-              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
-                1
-              </div>
-              <Wallet className="w-12 h-12 text-emerald-600 mb-4" />
-              <h3 className="text-xl font-bold text-slate-900 mb-3">You Deposit USDC</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Connect your wallet and deposit USDC into your chosen investment tier. Your funds are immediately secured
-                in our audited smart contracts on Solana.
-              </p>
-            </div>
+          {/* Visual Flow Diagram */}
+          <div className="relative mb-16">
+            {/* Connecting Line */}
+            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-200 -translate-y-1/2 z-0"></div>
 
-            {/* Step 2 */}
-            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
-              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
-                2
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Step 1 */}
+              <div className="group">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 transition-all shadow-lg hover:shadow-xl">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                      <Wallet className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg mb-4 shadow-md">
+                      1
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">You Deposit USDC</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Connect wallet and deposit USDC into your chosen tier
+                    </p>
+                  </div>
+                </div>
+                {/* Arrow for mobile */}
+                <div className="md:hidden flex justify-center my-4">
+                  <ChevronRight className="w-8 h-8 text-emerald-500 rotate-90" />
+                </div>
               </div>
-              <RefreshCw className="w-12 h-12 text-emerald-600 mb-4" />
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Auto-Buy $BASED Tokens</h3>
-              <p className="text-slate-600 leading-relaxed">
-                The protocol automatically uses a portion of your deposit to purchase the required amount of $BASED tokens
-                (if applicable to your tier). These tokens are locked to your position.
-              </p>
-            </div>
 
-            {/* Step 3 */}
-            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
-              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
-                3
+              {/* Step 2 */}
+              <div className="group">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 transition-all shadow-lg hover:shadow-xl">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                      <RefreshCw className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg mb-4 shadow-md">
+                      2
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">Auto-Buy $BASED</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Protocol purchases required $BASED tokens automatically
+                    </p>
+                  </div>
+                </div>
+                {/* Arrow for mobile */}
+                <div className="md:hidden flex justify-center my-4">
+                  <ChevronRight className="w-8 h-8 text-emerald-500 rotate-90" />
+                </div>
               </div>
-              <TrendingUp className="w-12 h-12 text-emerald-600 mb-4" />
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Funds Deploy to Strategies</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Remaining USDC is allocated across curated yield strategies: Kamino lending, Jito staking,
-                Meteora liquidity pools, and other institutional-grade protocols.
-              </p>
-            </div>
 
-            {/* Step 4 */}
-            <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-200 hover:border-emerald-500 transition-all relative">
-              <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
-                4
+              {/* Step 3 */}
+              <div className="group">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 transition-all shadow-lg hover:shadow-xl">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                      <TrendingUp className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg mb-4 shadow-md">
+                      3
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">Deploy to Strategies</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Funds allocated across Kamino, Jito, and Meteora protocols
+                    </p>
+                  </div>
+                </div>
+                {/* Arrow for mobile */}
+                <div className="md:hidden flex justify-center my-4">
+                  <ChevronRight className="w-8 h-8 text-emerald-500 rotate-90" />
+                </div>
               </div>
-              <BarChart3 className="w-12 h-12 text-emerald-600 mb-4" />
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Earn & Compound Yield</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Your investment generates yield according to your tier's strategy. Yields compound automatically,
-                and you can withdraw anytime (subject to tier-specific unlock fees).
-              </p>
+
+              {/* Step 4 */}
+              <div className="group">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 transition-all shadow-lg hover:shadow-xl">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                      <BarChart3 className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg mb-4 shadow-md">
+                      4
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">Earn & Compound</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Yields compound automatically with flexible withdrawals
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

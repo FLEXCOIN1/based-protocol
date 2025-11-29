@@ -32,10 +32,15 @@ export default function Whitepaper() {
       </section>
 
       {/* Table of Contents */}
-      <section className="py-16 px-6 bg-white border-b-2 border-slate-200">
+      <section className="py-16 px-6 bg-gradient-to-br from-slate-50 to-white border-b-2 border-slate-200">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Table of Contents</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Table of Contents</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
               '1. Executive Summary',
               '2. Protocol Overview',
@@ -43,10 +48,14 @@ export default function Whitepaper() {
               '4. Tokenomics',
               '5. Security & Audits',
               '6. Roadmap'
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-slate-600 hover:text-emerald-600 transition cursor-pointer">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="font-semibold">{item}</span>
+            ].map((item, index) => (
+              <div key={item} className="group">
+                <div className="flex items-center gap-3 p-4 bg-white border-2 border-slate-200 rounded-xl hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-500 transition-all">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 group-hover:text-white transition-all" />
+                  </div>
+                  <span className="font-bold text-slate-700 group-hover:text-emerald-600 transition-all">{item}</span>
+                </div>
               </div>
             ))}
           </div>

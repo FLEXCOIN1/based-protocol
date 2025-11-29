@@ -9,6 +9,10 @@
   "instructions": [
     {
       "name": "deposit",
+      "docs": [
+        "Deposit USDC, receive shares based on current NAV",
+        "Protocol will auto-buy crypto portfolio (done off-chain via Jupiter)"
+      ],
       "discriminator": [
         242,
         35,
@@ -48,78 +52,55 @@
           }
         },
         {
+          "name": "user_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
           "name": "user",
           "writable": true,
           "signer": true
         },
         {
-          "name": "user_token",
+          "name": "user_usdc",
           "writable": true
         },
         {
-          "name": "user_based_balance"
-        },
-        {
-          "name": "protocol_fee_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  114,
-                  111,
-                  116,
-                  111,
-                  99,
-                  111,
-                  108,
-                  95,
-                  102,
-                  101,
-                  101,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "strategy_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  116,
-                  114,
-                  97,
-                  116,
-                  101,
-                  103,
-                  121,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              }
-            ]
-          }
+          "name": "protocol_usdc_vault",
+          "writable": true
         },
         {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -134,16 +115,19 @@
       ]
     },
     {
-      "name": "initialize_protocol",
+      "name": "initialize",
+      "docs": [
+        "Initialize the protocol"
+      ],
       "discriminator": [
-        188,
-        233,
-        252,
-        106,
-        134,
-        146,
-        202,
-        91
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
       ],
       "accounts": [
         {
@@ -183,10 +167,277 @@
           "address": "11111111111111111111111111111111"
         }
       ],
+      "args": [
+        {
+          "name": "usdc_mint",
+          "type": "pubkey"
+        },
+        {
+          "name": "based_mint",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "pause_protocol",
+      "docs": [
+        "Authority only: Emergency pause"
+      ],
+      "discriminator": [
+        144,
+        95,
+        0,
+        107,
+        119,
+        39,
+        248,
+        141
+      ],
+      "accounts": [
+        {
+          "name": "protocol_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
       "args": []
     },
     {
+      "name": "unpause_protocol",
+      "docs": [
+        "Authority only: Unpause"
+      ],
+      "discriminator": [
+        183,
+        154,
+        5,
+        183,
+        105,
+        76,
+        87,
+        18
+      ],
+      "accounts": [
+        {
+          "name": "protocol_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_nav",
+      "docs": [
+        "Authority only: Update NAV (Net Asset Value)",
+        "Called after buying/selling crypto or when oracle prices update"
+      ],
+      "discriminator": [
+        56,
+        16,
+        234,
+        109,
+        155,
+        165,
+        5,
+        0
+      ],
+      "accounts": [
+        {
+          "name": "protocol_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_nav",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "docs": [
+        "Withdraw shares, receive USDC proportional to NAV",
+        "Exit fees apply based on time held"
+      ],
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "protocol_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user_usdc",
+          "writable": true
+        },
+        {
+          "name": "protocol_usdc_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "shares_to_burn",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "withdraw_fees",
+      "docs": [
+        "Authority only: Withdraw fees"
+      ],
       "discriminator": [
         198,
         212,
@@ -200,6 +451,7 @@
       "accounts": [
         {
           "name": "protocol_state",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -230,38 +482,11 @@
           "signer": true
         },
         {
-          "name": "protocol_fee_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  114,
-                  111,
-                  116,
-                  111,
-                  99,
-                  111,
-                  108,
-                  95,
-                  102,
-                  101,
-                  101,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              }
-            ]
-          }
+          "name": "protocol_usdc_vault",
+          "writable": true
         },
         {
-          "name": "destination",
+          "name": "treasury",
           "writable": true
         },
         {
@@ -290,21 +515,44 @@
         195,
         248
       ]
+    },
+    {
+      "name": "UserPosition",
+      "discriminator": [
+        251,
+        248,
+        209,
+        245,
+        83,
+        234,
+        17,
+        27
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidTier",
-      "msg": "Invalid tier"
+      "name": "ProtocolPaused",
+      "msg": "Protocol is paused"
     },
     {
       "code": 6001,
-      "name": "InsufficientBasedHoldings",
-      "msg": "Insufficient $BASED holdings for this tier"
+      "name": "InvalidTier",
+      "msg": "Invalid tier (must be 0, 1, or 2)"
     },
     {
       "code": 6002,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount (must be > 0)"
+    },
+    {
+      "code": 6003,
+      "name": "InsufficientShares",
+      "msg": "Insufficient shares"
+    },
+    {
+      "code": 6004,
       "name": "Unauthorized",
       "msg": "Unauthorized"
     }
@@ -320,6 +568,22 @@
             "type": "pubkey"
           },
           {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "based_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_shares",
+            "type": "u64"
+          },
+          {
+            "name": "total_nav",
+            "type": "u64"
+          },
+          {
             "name": "total_deposits",
             "type": "u64"
           },
@@ -328,8 +592,52 @@
             "type": "u64"
           },
           {
-            "name": "total_based_burned",
+            "name": "total_withdrawals",
             "type": "u64"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserPosition",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier",
+            "type": "u8"
+          },
+          {
+            "name": "shares",
+            "type": "u64"
+          },
+          {
+            "name": "deposit_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "total_deposited",
+            "type": "u64"
+          },
+          {
+            "name": "total_withdrawn",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

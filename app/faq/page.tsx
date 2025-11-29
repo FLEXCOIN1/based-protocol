@@ -83,28 +83,47 @@ export default function FAQ() {
       </section>
 
       {/* FAQ List */}
-      <section className="py-16 px-6">
+      <section className="py-16 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className="bg-white border-2 border-slate-200 rounded-xl overflow-hidden hover:border-emerald-500 transition-all"
+                className={`bg-white border-2 rounded-xl overflow-hidden transition-all shadow-sm hover:shadow-md ${
+                  openIndex === index ? 'border-emerald-500 shadow-lg' : 'border-slate-200'
+                }`}
               >
                 <button
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left"
+                  className="w-full px-6 py-5 flex items-center justify-between text-left group"
                 >
-                  <h3 className="text-lg font-bold text-slate-900 flex-1">{faq.q}</h3>
-                  {openIndex === index ? (
-                    <ChevronUp className="w-6 h-6 text-slate-400 flex-shrink-0 ml-4" />
-                  ) : (
-                    <ChevronDown className="w-6 h-6 text-slate-400 flex-shrink-0 ml-4" />
-                  )}
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      openIndex === index
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-100'
+                    }`}>
+                      <HelpCircle className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-base md:text-lg font-bold text-slate-900">{faq.q}</h3>
+                  </div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                    openIndex === index ? 'bg-emerald-100' : 'bg-slate-100'
+                  }`}>
+                    {openIndex === index ? (
+                      <ChevronUp className="w-5 h-5 text-emerald-600" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-slate-500" />
+                    )}
+                  </div>
                 </button>
                 {openIndex === index && (
-                  <div className="px-6 pb-5 pt-2">
-                    <p className="text-slate-600 leading-relaxed">{faq.a}</p>
+                  <div className="px-6 pb-6 pt-2">
+                    <div className="pl-14">
+                      <div className="bg-gradient-to-r from-emerald-50 to-white p-4 rounded-lg border-l-4 border-emerald-500">
+                        <p className="text-slate-700 leading-relaxed">{faq.a}</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
