@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Institutional-grade yield strategies delivering 10-100%+ APY",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -15,12 +17,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.solana.com https://*.helius-rpc.com https://api.devnet.solana.com wss://*.solana.com https://phantom.app https://*.phantom.app; frame-src 'self' https://phantom.app https://*.phantom.app; frame-ancestors 'self';"
-        />
-      </head>
       <body className="antialiased">
         <WalletContextProvider>
           <Navigation />
