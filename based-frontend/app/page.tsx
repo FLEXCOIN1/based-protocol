@@ -49,16 +49,27 @@ export default function Home() {
             and benefit from automatic buyback mechanisms.
           </p>
 
+          {/* Launch Banner */}
+          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg mb-8 inline-block">
+            <p className="text-sm font-bold">🚀 TOKEN LAUNCHES DECEMBER 3RD, 2025 ON PUMP.FUN</p>
+          </div>
+
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center mb-8">
-            <Link href="/dashboard" className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-emerald-500 transition-all shadow-lg inline-flex items-center justify-center gap-3">
+            <a
+              href="https://pump.fun"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-emerald-500 transition-all shadow-lg inline-flex items-center justify-center gap-3"
+            >
+              <TrendingUp className="w-5 h-5" />
+              Buy $BASED on Pump.fun
+            </a>
+            <Link href="/dashboard" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-semibold border-2 border-slate-300 hover:border-emerald-500 transition-all inline-flex items-center justify-center gap-3">
               <Wallet className="w-5 h-5" />
-              Start Investing
+              View Dashboard
             </Link>
             <Link href="/how-it-works" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-semibold border-2 border-slate-300 hover:border-emerald-500 transition-all">
               How It Works
-            </Link>
-            <Link href="/tokenomics" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-semibold border-2 border-slate-300 hover:border-emerald-500 transition-all">
-              View Tokenomics
             </Link>
           </div>
 
@@ -302,6 +313,120 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Launch Roadmap */}
+      <section className="py-20 md:py-28 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 mb-3 font-semibold">LAUNCH ROADMAP</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Path to Full Protocol</h2>
+            <p className="text-lg md:text-xl text-slate-600">Three-phase launch strategy for maximum value</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Phase 1 */}
+            <div className="relative">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-8 rounded-xl border-2 border-emerald-500 relative">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                  PHASE 1
+                </div>
+                <div className="mt-4 mb-6">
+                  <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">1</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 text-center">Pump.fun Launch</h3>
+                  <p className="text-sm text-emerald-700 text-center mt-2 font-semibold">December 3rd, 2025</p>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> $BASED token goes live
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Fair launch on Pump.fun
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Community building begins
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Marketing campaign starts
+                  </li>
+                </ul>
+              </div>
+              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-emerald-300"></div>
+            </div>
+
+            {/* Phase 2 */}
+            <div className="relative">
+              <div className="bg-slate-50 p-8 rounded-xl border-2 border-slate-300 relative">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-bold">
+                  PHASE 2
+                </div>
+                <div className="mt-4 mb-6">
+                  <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">2</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 text-center">Raydium Graduation</h3>
+                  <p className="text-sm text-slate-600 text-center mt-2 font-semibold">Target: $69K Market Cap</p>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Graduate to Raydium DEX
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Enhanced liquidity
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> DEX listing achieved
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Broader market access
+                  </li>
+                </ul>
+              </div>
+              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-slate-300"></div>
+            </div>
+
+            {/* Phase 3 */}
+            <div className="relative">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-xl border-2 border-purple-500 relative">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold">
+                  PHASE 3
+                </div>
+                <div className="mt-4 mb-6">
+                  <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">3</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 text-center">Protocol Activation</h3>
+                  <p className="text-sm text-purple-700 text-center mt-2 font-semibold">Q1 2026</p>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Full ETF protocol launch
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Deposits enabled
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Yield strategies active
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-500 flex-shrink-0">✓</span> Buyback mechanism live
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <div className="bg-amber-50 border-2 border-amber-200 p-6 rounded-xl max-w-3xl mx-auto">
+              <p className="text-sm text-amber-900 leading-relaxed">
+                <strong>Current Status:</strong> We are in Phase 1 preparation. Token launches December 3rd on Pump.fun.
+                Full protocol features (deposits/withdrawals) will be available after Raydium graduation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Swap Section */}
       <section className="py-20 md:py-28 px-6 bg-slate-800">
         <div className="max-w-4xl mx-auto">
@@ -316,14 +441,14 @@ export default function Home() {
 
             <div className="relative z-10">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3 font-semibold">TRADE $BASED</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Swap $BASED with Jupiter</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Buy $BASED on Pump.fun</h2>
               <p className="text-slate-400 mb-8 md:mb-10 text-base md:text-lg max-w-2xl">
-                Execute best-price swaps across Solana liquidity. Jupiter handles routing, settlement, and deep liquidity for every trade.
+                Join the fair launch on Pump.fun. After hitting $69K market cap, we'll graduate to Raydium for enhanced liquidity and full protocol features.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/dashboard" className="bg-emerald-500 text-white px-8 py-4 rounded-lg font-bold hover:bg-emerald-400 transition-all text-center">
-                  Swap on Jupiter
-                </Link>
+                <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" className="bg-emerald-500 text-white px-8 py-4 rounded-lg font-bold hover:bg-emerald-400 transition-all text-center">
+                  Buy on Pump.fun
+                </a>
                 <a href="https://dexscreener.com" target="_blank" rel="noopener noreferrer" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-semibold hover:bg-slate-100 transition-all text-center">
                   View on Dexscreener
                 </a>

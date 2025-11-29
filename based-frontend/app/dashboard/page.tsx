@@ -214,6 +214,15 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Launch Banner */}
+      <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-4 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-sm md:text-base font-bold">
+            🚀 $BASED launches on Pump.fun - December 3rd, 2025 | Full protocol activates after Raydium graduation
+          </p>
+        </div>
+      </div>
+
       {/* Header */}
       <section className="bg-gradient-to-br from-slate-800 to-slate-900 py-12 px-6">
         <div className="max-w-7xl mx-auto">
@@ -401,19 +410,16 @@ export default function Dashboard() {
                     />
                   </div>
                   <button
-                    onClick={handleDeposit}
-                    disabled={depositing || !depositAmount || parseFloat(depositAmount) <= 0}
-                    className="w-full bg-emerald-600 text-white py-4 rounded-lg font-bold hover:bg-emerald-500 transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled
+                    className="w-full bg-slate-300 text-slate-600 py-4 rounded-lg font-bold cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {depositing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      'Deposit & Start Earning'
-                    )}
+                    Deposits Available After Raydium Graduation
                   </button>
+                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                    <p className="text-xs text-amber-800 leading-relaxed">
+                      <strong>Phase 1:</strong> Token launches December 3rd on Pump.fun. Deposits will be enabled in Phase 3 after we graduate to Raydium at $69K market cap.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -440,22 +446,16 @@ export default function Dashboard() {
                       />
                     </div>
                     <button
-                      onClick={handleWithdraw}
-                      disabled={withdrawing || !withdrawShares || parseFloat(withdrawShares) <= 0}
-                      className="w-full bg-slate-800 text-white py-4 rounded-lg font-bold hover:bg-slate-700 transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      disabled
+                      className="w-full bg-slate-300 text-slate-600 py-4 rounded-lg font-bold cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {withdrawing ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        'Withdraw'
-                      )}
+                      Withdrawals Available After Raydium Graduation
                     </button>
-                    <p className="text-xs text-amber-600 text-center font-semibold">
-                      Exit fee: {exitFeePercent}% (decreases over 12 months)
-                    </p>
+                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                      <p className="text-xs text-amber-800 leading-relaxed">
+                        Full protocol features including withdrawals will activate in Q1 2026 after Raydium graduation.
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
