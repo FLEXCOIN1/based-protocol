@@ -13,11 +13,15 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    # Force HTTPS only - Let Next.js handle CSP and other security headers
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.solana.com https://*.helius-rpc.com https://api.devnet.solana.com wss://*.solana.com https://phantom.app https://*.phantom.app; frame-src 'self' https://phantom.app https://*.phantom.app;"
 
 [build]
   command = "npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
