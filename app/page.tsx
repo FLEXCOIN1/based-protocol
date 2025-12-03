@@ -77,6 +77,57 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Breaking News Banner - Vanguard */}
+      <section className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 py-6 px-6 animate-pulse">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 bg-white rounded-full p-2 mt-1">
+              <TrendingUp className="w-6 h-6 text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+                  BREAKING NEWS
+                </span>
+                <span className="text-white text-xs font-semibold">December 1st, 2025</span>
+              </div>
+              <h3 className="text-white font-bold text-lg md:text-xl mb-2">
+                Vanguard Opens Platform to Crypto ETFs Including Solana
+              </h3>
+              <p className="text-white/95 text-sm md:text-base mb-3 leading-relaxed">
+                Vanguard, the world's second-largest asset manager with $11 trillion in assets, announced they will allow crypto ETFs including Solana starting December 2nd, 2025. This gives 50 million clients access to crypto.
+              </p>
+              <div className="flex flex-wrap gap-3 text-xs">
+                <a
+                  href="https://www.bloomberg.com/news/articles/2025-12-01/vanguard-relents-on-crypto-etfs-will-allow-them-on-its-platform"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-md font-medium transition-all backdrop-blur-sm"
+                >
+                  Bloomberg →
+                </a>
+                <a
+                  href="https://finance.yahoo.com/news/vanguard-now-allow-crypto-etfs-211500405.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-md font-medium transition-all backdrop-blur-sm"
+                >
+                  Yahoo Finance →
+                </a>
+                <a
+                  href="https://www.coindesk.com/business/2025/12/01/vanguard-opens-platform-to-crypto-etfs-in-major-shift-bloomberg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-md font-medium transition-all backdrop-blur-sm"
+                >
+                  CoinDesk →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How to Invest */}
       <section className="py-20 md:py-28 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
